@@ -1,0 +1,11 @@
+function dX = bicycle_est_fun(t,x,L,delta)
+state = x(1:5,1);
+P = reshape(x(6:end,1),5,5);
+
+v = state(5);
+dstate = [v*cos(state(3)); v*sin(state(3)); v/L*tan(delta); v; 0];
+
+F = 
+
+
+end
