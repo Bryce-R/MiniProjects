@@ -1,3 +1,5 @@
 # MiniProjects
 Mini projects I did here and there.
-![alt tag](https://github.com/Bryce-R/MiniProjects/blob/master/ParticleFilter/results.eps)
+
+particle filter for localization, see video on youtube:
+https://www.youtube.com/watch?v=-stxSzIevlg&feature=youtu.be
