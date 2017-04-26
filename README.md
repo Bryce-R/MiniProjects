@@ -2,4 +2,5 @@
 Mini projects I did here and there.
 
 Particle filter for localization, see video on youtube:
-https://www.youtube.com/watch?v=-stxSzIevlg&feature=youtu.be
+
+https://youtu.be/-stxSzIevlg
