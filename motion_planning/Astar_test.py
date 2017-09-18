@@ -66,6 +66,8 @@ class Astar(object):
             current_node = open_q.get()
             current_pos = current_node[1]
             current_cell = current_node[2]
+            if current_cell in close_set:
+                continue
 
             self.visualize(current_pos, 'c:')
             print current_cell, self.goal_cell
@@ -109,7 +111,7 @@ class Astar(object):
     
 def main():
     start = (0.0, 0.0, np.pi/2.0)
-    goal =  (15.0, 15.0, np.pi/2.)
+    goal =  (11.0, 0.0, -np.pi/2.)
     planner = Astar(start, goal)
     # set up plotting 
     pl.figure(figsize=(8*1.1, 6*1.1))
