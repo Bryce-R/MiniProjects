@@ -26,13 +26,13 @@ class Astar(object):
     
     def heuristic(self, current):
         # cost_h = (current[0] - self.goal[0])**2 + (current[1] - self.goal[1])**2 + (current[2] - self.goal[2])**2
-        w_x = 50.0
+        w_x = 30.0
         w_y = 10.0
         w_theta = 10.0
-        if current[0] < self.goal[0]:
-            cost_h = np.sqrt( (current[0] - self.goal[0])**2*w_x**2 + (current[1] - self.goal[1])**2*w_y**2 ++ (current[2] - self.goal[2])**2*(w_theta)**2 )
-        else:
-            cost_h = float('inf')
+        # if current[0] < self.goal[0]:
+        cost_h = np.sqrt( (current[0] - self.goal[0])**2*w_x**2 + (current[1] - self.goal[1])**2*w_y**2 ++ (current[2] - self.goal[2])**2*(w_theta)**2 )
+        # else:
+        #     cost_h = float('inf')
         # cost_h = current[0] - self.goal[0] + np.sqrt( (current[1] - self.goal[1])**2*w_y**2 ++ (current[2] - self.goal[2])**2*(w_theta)**2)
         return cost_h
     
@@ -67,7 +67,7 @@ class Astar(object):
             current_pos = current_node[1]
             current_cell = current_node[2]
 
-            self.visualize(current_pos)
+            self.visualize(current_pos, 'c:')
             print current_cell, self.goal_cell
             if self.close_to_goal(current_cell) :
                 return self.reconstruct_path(current_pos, current_cell, ancestor)
@@ -102,6 +102,10 @@ class Astar(object):
             current_pos, current_cell = ancestor[(current_pos, current_cell)]
             # print current_pos, current_cell
             total_path += [ current_pos ]
+        # print total_path
+        for pos in reversed(total_path):
+            self.visualize(pos, 'r--')
+        pl.show()
     
 def main():
     start = (0.0, 0.0, np.pi/2.0)
