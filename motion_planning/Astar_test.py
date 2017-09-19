@@ -24,17 +24,28 @@ class Astar(object):
         current_cell = (np.floor(current_pos[0]/self.cellsize[0]), np.floor(current_pos[1]/self.cellsize[1]), np.floor(current_pos[2]/self.cellsize[2]) )
         return current_cell
     
-    def heuristic(self, current):
-        # cost_h = (current[0] - self.goal[0])**2 + (current[1] - self.goal[1])**2 + (current[2] - self.goal[2])**2
-        w_x = 30.0
-        w_y = 10.0
-        w_theta = 10.0
-        # if current[0] < self.goal[0]:
-        cost_h = np.sqrt( (current[0] - self.goal[0])**2*w_x**2 + (current[1] - self.goal[1])**2*w_y**2 ++ (current[2] - self.goal[2])**2*(w_theta)**2 )
-        # else:
-        #     cost_h = float('inf')
-        # cost_h = current[0] - self.goal[0] + np.sqrt( (current[1] - self.goal[1])**2*w_y**2 ++ (current[2] - self.goal[2])**2*(w_theta)**2)
+    def euclidean_dis(self, current):
+        cost = np.sqrt( (current[0] - self.goal[0])**2 + (current[1] - self.goal[1])**2 )
+        return cost
+    def norm_dis(self, current):
+        theta = self.goal[2]
+        current = list(current)
+        current[2] -= theta
+        current[0] -= self.goal[0]
+        current[1] -= self.goal[1]
+        current[0], current[1] = (np.cos(theta)*current[0]+np.sin(theta)*current[1],  -np.sin(theta)*current[0]+np.cos(theta)*current[1]) 
+        print current 
+        w_x = 10.0
+        w_y = 60.0
+        w_theta = 15.0
+        if current[0] <=0:
+            cost_h = np.sqrt( (current[0])**2*w_x**2 + (current[1])**2*w_y**2 ++ (current[2])**2*(w_theta)**2 )
+        else:
+            cost_h = float('inf')
         return cost_h
+    def heuristic(self, current):
+
+        return self.norm_dis(current)
     
     def euler_int_model(self, current_pos, steering):
         next_pos_x = current_pos[0]+np.cos(current_pos[2])*self.v
@@ -45,7 +56,8 @@ class Astar(object):
     
     def get_neighbors(self, current_pos):
         # neighbors = [ self.model(current_pos, 0.0), self.model(current_pos, self.steering_change/180.0*np.pi), self.model(current_pos, -self.steering_change/180.0*np.pi) ]
-        neighbors = [ self.model(current_pos, 0.0, 0.2), self.model(current_pos, 20./180.0*np.pi, 0.2), self.model(current_pos, -20./180.0*np.pi, 0.2) ]        
+        max_turn = 1/2.66*(np.tan(25./180.0*np.pi))
+        neighbors = [ self.model(current_pos, 0.0, 0.2), self.model(current_pos, max_turn, 0.2), self.model(current_pos, -max_turn, 0.2) ]        
         return neighbors
     
     def close_to_goal(self, current_cell):
@@ -111,8 +123,15 @@ class Astar(object):
     
 def main():
     start = (0.0, 0.0, np.pi/2.0)
-    goal =  (11.0, 0.0, -np.pi/2.)
+    # goal =  (11.0, 0.0, -np.pi/2.)
+    goal =  (5.5, 5.5, 0.)
+    # goal =  (6.5, 5.5, 0.)
+    # goal =  (5.5, 16.5, 0.)
+    # goal =  (5.5, 2.5, 0.)
+    # goal = (1.0, 5.0, np.pi/2.0)
     planner = Astar(start, goal)
+
+    
     # set up plotting 
     pl.figure(figsize=(8*1.1, 6*1.1))
     pl.plot(start[0], start[1], 'og', label = 'start')

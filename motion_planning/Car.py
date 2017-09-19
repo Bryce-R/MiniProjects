@@ -44,6 +44,7 @@ class Car(object):
         car_pts += np.array( [[self.current_state[0]], [self.current_state[1]] ] )
 
         ax_car = pl.plot( car_pts[0,:], car_pts[1,:], color )
+        ax_car = pl.plot( car_pts[0,:2], car_pts[1,:2], color, marker= '+' )
         if self.visualize_as_center:
             pl.xlim([self.current_state[0]-20., self.current_state[0]+20.])
             pl.ylim([self.current_state[1]-20., self.current_state[1]+20.])
