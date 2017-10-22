@@ -4,12 +4,13 @@ import pylab as pl
 from scipy.integrate import odeint
 
 class Car(object):
-    def __init__(self, length, width, v, current_state):
+    def __init__(self, length, width, v, current_state, min_turn_radius):
         self._length = length
         self._width = width
         self._v = v
         self.current_state = current_state
         self.visualize_as_center = True
+        self.min_turn_radius = min_turn_radius
     def kinematics(self, current_state, t, control):
         # current_state = [x, y, theta]
         dstate = [0.0, 0.0, 0.0]

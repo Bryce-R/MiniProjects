@@ -45,7 +45,7 @@ class Astar(object):
         current[1] -= self.goal[1]
         current[0], current[1] = (np.cos(theta)*current[0]+np.sin(theta)*current[1],  -np.sin(theta)*current[0]+np.cos(theta)*current[1]) 
         print current 
-        w_x, w_y, w_theta = 10.0, 60.0, 15.0
+        w_x, w_y, w_theta = 10.0, 10.0*2., 35.0*2.
     
         if current[0] <=0:
             cost_h = np.sqrt( (current[0])**2*w_x**2 + (current[1])**2*w_y**2 ++ (current[2])**2*(w_theta)**2 )
@@ -83,7 +83,17 @@ class Astar(object):
             return self.norm_dis_augmented(current)
         elif self.heuristic_func == 'euclidean_dis':
             return self.euclidean_dis(current)
-        
+    def moving_cost(self, current):
+        theta = self.start[2]
+        current = list(current)
+        current[0] -= self.start[0]
+        current[1] -= self.start[1]
+        current[2] -= theta
+        current[0], current[1] = (np.cos(theta)*current[0]+np.sin(theta)*current[1],  -np.sin(theta)*current[0]+np.cos(theta)*current[1]) 
+        w_x, w_y, w_theta = 10.0, 20.0, 35.0*2
+        # cost_h = np.sqrt( (current[0]- self.start[0])**2*w_x**2 + (current[1] - self.start[1])**2*w_y**2 ++ (current[2]- self.start[2])**2*(w_theta)**2 )
+        cost_h = np.sqrt( (current[0])**2*w_x**2 + (current[1])**2*w_y**2 ++ (current[2])**2*(w_theta)**2 )
+        return cost_h
     
     def euler_int_model(self, current_pos, steering):
         next_pos_x = current_pos[0]+np.cos(current_pos[2])*self.v
@@ -132,7 +142,7 @@ class Astar(object):
                 neighbor = tuple(neighbor)
                 neighbor_cell = self.cont_2_dist(neighbor)
                 
-                neighbor_moving_cost = current_moving_cost + self.f_cost
+                neighbor_moving_cost = self.moving_cost(neighbor) #current_moving_cost + self.f_cost
                 if neighbor_cell not in close_set:
                     if neighbor_cell in open_set:
                         if neighbor_moving_cost < moving_cost[ neighbor_cell ]:
@@ -182,9 +192,11 @@ def main():
     
     
     goal_set = []
-    goal_set+= [(11.0, 0.0, -np.pi/2.), (-5.5, 5.5, np.pi) ,(12.5, 5.5, 0.) ,  (5.5, 16.5, 0.) ]
+    goal_set+= [(11.0, 0.0, -np.pi/2.), (-5.5, 5.5, np.pi) ,(12.5, 5.5, 0.) ]
+    # goal_set+= [ (5.5, 16.5, 0.) ]
+    # goal_set+= [ (5.5, 6.5, 0.) ]
     # goal_set += [(0.0, 3.0, np.pi/2.)]
-    planner.heuristic_func = 'norm_dis_augmented'
+    planner.heuristic_func = 'norm_dis'
     
     
     

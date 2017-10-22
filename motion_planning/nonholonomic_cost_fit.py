@@ -19,14 +19,18 @@ def main():
     pl.ylim([-20., 20.])
     
     start = (0.0, 0.0, 0.0)
-    myCar = Car.Car(2.66, 1.5, -1.0, start) 
+    myCar = Car.Car(2.66, 1.5, -1.0, start, 5.5) 
     myCar.visualize_as_center = False
     if os.path.isfile('cost_func.pickle') :
         with open('cost_func.pickle', 'rb') as handle:
             cost_func = pickle.load(handle)
     for current_cell in cost_func:
         current_pos = nonholonomic_cost_func.dist_2_cont(current_cell)
-        myCar.visualize(current_pos, 'c:')
+        # myCar.visualize(current_pos, 'c:')
+        pl.plot(current_pos[0], current_pos[1], '+c', label = 'start')
+        # 
+        # pl.pause(0.01)
+    pl.show()
     print 'End.'
 
 
