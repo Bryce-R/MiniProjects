@@ -3,16 +3,17 @@ import numpy as np
 import Queue
 import pylab as pl
 import Car
+import dubins
 
 
 class Astar(object):
     def __init__(self, start, goal):
         self.start = start
         self.goal = goal
-        self.cellsize = (0.2, 0.2, 2./180*np.pi )
+        self.cellsize = (0.1, 0.1, 1./180*np.pi )
         self.start_cell = self.cont_2_dist(start)
         self.goal_cell = self.cont_2_dist(goal)
-        self.f_cost = 0.1
+        self.f_cost = 0.0
         self.v = 0.5
         self.steering_change = 2.0
         self.Car = Car.Car(2.66, 1.5, 1.0, start, 5.5) 
@@ -29,6 +30,19 @@ class Astar(object):
     def set_goal(self, goal):
         self.goal = goal
         self.goal_cell = self.cont_2_dist(goal)
+        
+    def nonholonomic(self, current):
+        # theta = self.goal[2]
+        # current = list(current)
+        # current[0] -= self.goal[0] #x
+        # current[1] -= self.goal[1] #y
+        # current[2] -= theta #heading 
+        # current[0], current[1] = (np.cos(theta)*current[0]+np.sin(theta)*current[1],  -np.sin(theta)*current[0]+np.cos(theta)*current[1]) 
+        q0 = current
+        q1 = self.goal
+        turning_radius = 5.74
+        cost = dubins.path_length(q0, q1, turning_radius)
+        return cost
         
     def cont_2_dist(self, current_pos):
         current_cell = (np.floor(current_pos[0]/self.cellsize[0]), np.floor(current_pos[1]/self.cellsize[1]), np.floor(current_pos[2]/self.cellsize[2]) )
@@ -83,6 +97,8 @@ class Astar(object):
             return self.norm_dis_augmented(current)
         elif self.heuristic_func == 'euclidean_dis':
             return self.euclidean_dis(current)
+        elif self.heuristic_func == 'nonholonomic':
+            return self.nonholonomic(current)
         
     
     def euler_int_model(self, current_pos, steering):
@@ -95,7 +111,13 @@ class Astar(object):
     def get_neighbors(self, current_pos):
         # neighbors = [ self.model(current_pos, 0.0), self.model(current_pos, self.steering_change/180.0*np.pi), self.model(current_pos, -self.steering_change/180.0*np.pi) ]
         max_turn = 1/2.66*(np.tan(25./180.0*np.pi))
-        neighbors = [ self.model(current_pos, 0.0, 0.2), self.model(current_pos, max_turn, 0.2), self.model(current_pos, -max_turn, 0.2) ]        
+        turns = np.linspace( -max_turn, max_turn, 21, endpoint= True )
+        dt = 0.2
+        neighbors = []
+        for turn in turns:
+            neighbors += [self.model(current_pos, turn, dt)]
+        # neighbors = [ self.model(current_pos, 0.0, dt), self.model(current_pos, max_turn, dt), self.model(current_pos, -max_turn, dt) , self.model(current_pos, max_turn/2., dt),
+        # self.model(current_pos, -max_turn/2., dt) ]        
         return neighbors
     
     def close_to_goal(self, current_cell):
@@ -120,7 +142,7 @@ class Astar(object):
                 continue
 
             self.visualize(current_pos, 'c:')
-            print current_cell, self.goal_cell, current_pos
+
             if self.close_to_goal(current_cell) :
                 if self.reconstruct is True:
                     self.reconstruct_path(current_pos, current_cell, ancestor)
@@ -131,6 +153,7 @@ class Astar(object):
             for neighbor in self.get_neighbors(current_pos):
                 neighbor = tuple(neighbor)
                 neighbor_cell = self.cont_2_dist(neighbor)
+                print neighbor, self.heuristic(neighbor)
                 
                 neighbor_moving_cost = current_moving_cost + self.f_cost
                 if neighbor_cell not in close_set:
@@ -147,6 +170,7 @@ class Astar(object):
                         total_cost[ (neighbor, neighbor_cell) ] = neighbor_moving_cost + self.heuristic(neighbor)
                         open_q.put( (total_cost[ (neighbor, neighbor_cell) ], neighbor, neighbor_cell ) )    
                         ancestor[(neighbor, neighbor_cell)] =   (current_pos, current_cell)    
+                    # print neighbor, total_cost[ (neighbor, neighbor_cell) ]
         print 'Path not found!!!!!!!!! '
         return False 
     def reconstruct_path(self, current_pos, current_cell, ancestor):
@@ -182,9 +206,14 @@ def main():
     
     
     goal_set = []
-    goal_set+= [(11.0, 0.0, -np.pi/2.), (-5.5, 5.5, np.pi) ,(12.5, 5.5, 0.) ,  (5.5, 16.5, 0.) ]
+    # goal_set+= [(11.0, 0.0, -np.pi/2.)] 
+    # goal_set += [(-5.5, 5.5, np.pi) ,(12.5, 5.5, 0.) ,  (5.5, 16.5, 0.) ]?\
     # goal_set += [(0.0, 3.0, np.pi/2.)]
-    planner.heuristic_func = 'norm_dis_augmented'
+    # planner.heuristic_func = 'norm_dis_augmented'
+    # goal_set += [ (0.0, 10.0, np.pi/2.)]
+    # goal_set += [ (10.5, 5.5, 0.0) ]
+    goal_set += [ (15, 0., np.pi/2.0*3.0) ]
+    planner.heuristic_func = 'nonholonomic'
     
     
     

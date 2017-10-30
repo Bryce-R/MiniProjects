@@ -54,7 +54,7 @@ class Car(object):
 if __name__ == '__main__':
     current_state = [0.0, 0.0, 0.0]
     print current_state
-    myCar = Car(2.66, 1.5, 1.0, current_state) 
+    myCar = Car(2.66, 1.5, 1.0, current_state, 5.5) 
     myCar.visualize_as_center = True
     pl.figure(figsize=(8*1.1, 6*1.1))
     pl.axis('equal')
@@ -64,8 +64,9 @@ if __name__ == '__main__':
     # pl.legend(fancybox=True, framealpha=0.5)
     
     myCar.visualize()
-    for i in xrange(20):
-        next_state = myCar.integrate_car(None, 0.1, 0.5)
+    max_turn = 1/2.66*(np.tan(25./180.0*np.pi))
+    for i in xrange(40):
+        next_state = myCar.integrate_car(None, max_turn, 0.5)
         myCar.visualize()
         print next_state
     
