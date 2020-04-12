@@ -4,9 +4,14 @@ import yfinance as yf
 import quandl
 import numpy as np
 
+from pandas.plotting import register_matplotlib_converters
+register_matplotlib_converters()
+
 quandl.ApiConfig.api_key = "Dne4SGor1UQsBqsyGP3X"
 
-start_date = "2020-01-01"
+# plt.style.use('Solarize_Light2')
+
+start_date = "2020-03-01"
 end_date = "2020-04-11"
 
 # plt.subplot(211)
@@ -16,6 +21,7 @@ vix = quandl.get("CHRIS/CBOE_VX1.4", start_date=start_date,
                  end_date=end_date)
 # vix.plot()
 # print vix.values
+vixVal = vix.values
 # Need subscription or premium API
 # spy = quandl.get("EOD/SPY.4", start_date=start_date,
 #                  end_date=end_date)
@@ -27,8 +33,8 @@ vix = quandl.get("CHRIS/CBOE_VX1.4", start_date=start_date,
 # plt.plot(vix[:, 0], vix[:, 1], label="vix")
 
 
-spyPrice = yf.download('SPY', '2020-01-01', '2020-04-11')
-print spyPrice
+spyPrice = yf.download('SPY', start_date, end_date)
+# print spyPrice
 # plt.subplot(212)
 # spyPrice.Close.plot()
 # plt.grid("on")
@@ -47,12 +53,13 @@ for i in range(1, spyClose.shape[0]):
     spyChangeLow[i] = (spyLow[i]-spyClose[i-1])/spyClose[i-1]*100.0
 
 # print spyNp
+sqrtDays = np.sqrt(252)
 plt.figure()
-plt.plot(spyChangePercent, label="spyChange")
-plt.plot(spyChangeHigh, label="spyChangeHigh")
-plt.plot(spyChangeLow, label="spyChangeLow")
-plt.plot(vix/16.0, "--", label="vix/16")
-plt.plot(-vix/16.0, "--", label="vix/16")
-plt.grid("on")
+plt.plot(spyChangePercent, 'g--+', label="spyChange")
+plt.plot(spyChangeHigh, "b-", label="spyChangeHigh")
+plt.plot(spyChangeLow, "r--+", label="spyChangeLow")
+plt.plot(vixVal/sqrtDays, "--", label="vix-IV")
+plt.plot(-vixVal/sqrtDays, "--", label="vix-IV")
+plt.grid()
 plt.legend(fancybox=True, framealpha=0.3, loc="best")
 plt.show()
