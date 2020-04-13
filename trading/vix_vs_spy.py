@@ -11,8 +11,17 @@ quandl.ApiConfig.api_key = "Dne4SGor1UQsBqsyGP3X"
 
 # plt.style.use('Solarize_Light2')
 
-start_date = "2020-03-01"
-end_date = "2020-04-10"
+# start_date = "2020-03-01"
+# end_date = "2020-04-10"
+
+# start_date = "2008-09-01"
+# end_date = "2009-12-01"
+
+# start_date = "2008-12-01"
+# end_date = "2009-03-10"
+
+start_date = "2009-03-10"
+end_date = "2009-05-10"
 
 # plt.subplot(211)
 # https://docs.quandl.com/docs/python-time-series
@@ -57,14 +66,18 @@ for i in range(1, spyClose.shape[0]):
 # print spyNp
 sqrtDays = np.sqrt(252)
 plt.figure(figsize=[12, 8])
-plt.plot(spyPrice.axes[0], spyChangePercent, 'k', label="spyChange")
+plt.plot(spyPrice.axes[0], spyChangePercent, 'ko:', label="spyChange")
 plt.plot(spyPrice.axes[0], spyChangeHigh, "go", label="spyChangeHigh")
 plt.plot(spyPrice.axes[0], spyChangeLow, "ro", label="spyChangeLow")
 for i in range(spyClose.shape[0]):
     plt.plot([spyPrice.axes[0][i], spyPrice.axes[0][i], spyPrice.axes[0][i]], [
              spyChangeHigh[i], spyChangePercent[i], spyChangeLow[i]], "b-")
-plt.plot(vix.axes[0], vixVal/sqrtDays, "--", label="vix-IV")
-plt.plot(vix.axes[0], -vixVal/sqrtDays, "--", label="vix-IV")
+plt.plot(vix.axes[0], vixVal/sqrtDays, "--", label="68%")
+plt.plot(vix.axes[0], -vixVal/sqrtDays, "--", label="68%")
+plt.plot(vix.axes[0], vixVal*2.0/sqrtDays, "--", label="95%")
+plt.plot(vix.axes[0], -vixVal*2.0/sqrtDays, "--", label="95%")
+plt.plot(vix.axes[0], vixVal*3.0/sqrtDays, "--", label="98%")
+plt.plot(vix.axes[0], -vixVal*3.0/sqrtDays, "--", label="98%")
 plt.xticks(rotation=0)
 plt.grid()
 plt.legend(fancybox=True, framealpha=0.3, loc="best")
