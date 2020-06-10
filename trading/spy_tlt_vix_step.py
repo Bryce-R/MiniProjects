@@ -15,10 +15,19 @@ register_matplotlib_converters()
 if __name__ == "__main__":
     # start_date = "2008-08-01"
     # end_date = "2009-09-06"
-    start_date = "2019-01-01"
-    end_date = "2020-06-06"
+    # start_date = "2019-01-01"
+    # end_date = "2020-06-06"
     # start_date = "2017-01-01"
     # end_date = "2018-01-01"
+
+    start_date = "2016-01-01"
+    end_date = "2019-01-01"
+
+    # start_date = "2019-03-01"
+    # end_date = "2020-06-06"
+
+    timeStep = 1  # days
+
     print "start_date: ", start_date, ". end_date: ", end_date
     spyData = Utils.getTickerData("SPY", start_date, end_date)
     tltData = Utils.getTickerData("TLT", start_date, end_date)
@@ -40,7 +49,7 @@ if __name__ == "__main__":
     tltChangePercent = np.zeros(num)
     gldChangePercent = np.zeros(num)
     vixChangePercent = np.ones(vixLen)
-    timeStep = 1  # days
+
     print "timestep: ", timeStep, " days."
     for i in range(timeStep, num):
         spyChangePercent[i] = (
@@ -57,14 +66,17 @@ if __name__ == "__main__":
 
     bothDropping = []
     bothRising = []
-    for i in range(1, num):
+    for i in range(1, num-1):
+        # if abs(spyChangePercent[i]) < 0.2:
+        #     continue
         if(spyChangePercent[i] > 0.0 and vixChangePercent[i] > 0.0):
             bothRising += [i]
         if(spyChangePercent[i] < 0.0 and vixChangePercent[i] < 0.0):
             bothDropping += [i]
 
     acct = portfolio()
-    percentage = [1.0]
+    transaction_dates = [spyData.axes[0][0]]
+    percentage = [spyClose[0]]
     cost_basis = []
     for i in range(timeStep, num):
         if i in bothDropping:
@@ -75,10 +87,17 @@ if __name__ == "__main__":
             avg_cost = sum(cost_basis)/len(cost_basis)
             percentage += [((spyClose[i] - avg_cost) /
                             avg_cost+1.0)*percentage[-1]]
+            transaction_dates += [spyData.axes[0][i]]
             cost_basis = []
 
     print percentage
-    print (spyClose[-1])/spyClose[0]
+    wins = 0.0
+    for i in range(1, len(transaction_dates)):
+        if(percentage[i] < percentage[i-1]):
+            wins += 1
+    print "winning rate: ", (1.0-wins/len(percentage))*100.0
+
+    # print (spyClose[-1])/spyClose[0]
     # plt.figure(figsize=[12, 8])
     # # plt.plot(gldData.axes[0], gldChangePercent, ".", label="GLD")
     # plt.plot(spyData.axes[0], spyChangePercent, ".-", label="SPY")
@@ -97,6 +116,10 @@ if __name__ == "__main__":
     # ax2.plot(spyData.axes[0], spyChangePercent, ".-", label="SPY")
     # ax2.legend()
     ax1.plot(spyData.axes[0], spyClose, label="SPY")
+    ax1.plot(transaction_dates, percentage, "g.-", label="acct")
+    for i in range(1, len(transaction_dates)):
+        if(percentage[i] < percentage[i-1]):
+            ax1.plot(transaction_dates[i], percentage[i], "r.")
     # plt.plot(tltData.axes[0], tltClose, label="TLT")
     # plt.plot(gldData.axes[0], gldClose, label="GLD")
     # plt.plot(vixAxes, vixData, '.', label="VIX")
@@ -108,7 +131,7 @@ if __name__ == "__main__":
              spyClose[bothDropping[-1]], "g*", label="buy, both Dropping")
     ax1.plot(spyData.axes[0][bothRising[-1]],
              spyClose[bothRising[-1]], "r*", label="sell, both Rising")
-
+    plt.title("timeStep: " + str(timeStep) + " days")
     plt.xticks(rotation=0)
     plt.grid()
     plt.legend(fancybox=True, framealpha=0.3, loc="best")
