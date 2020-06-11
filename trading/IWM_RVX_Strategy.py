@@ -90,10 +90,9 @@ if __name__ == "__main__":
         print "~~~~~~~~~~~~~~~ You BEAT the market ~~~~~~~~~~~~~~~"
 
     plt.figure(figsize=[12, 8])
-    # plt.plot(gldData.axes[0], gldChangePercent, ".", label="GLD")
-    plt.plot(spyData.axes[0], spyChangePercent, ".-", label="SPY")
-    # plt.plot(tltData.axes[0], tltChangePercent, ".", label="TLT")
-    plt.plot(vixAxes, vixChangePercent, '.-', label="VIX")
+    plt.plot(vixAxes, vixClose, "-", label="RVX")
+    plt.plot(spyData.axes[0], spyClose, "-", label="IWM")
+    plt.legend()
 
     plt.xticks(rotation=90)
     plt.grid()
@@ -102,10 +101,6 @@ if __name__ == "__main__":
 
     print "bothRising: ", len(bothRising), "bothDropping", len(bothDropping)
     fig, ax1 = plt.subplots(figsize=[12, 8])
-    # ax2 = ax1.twinx()
-    # ax2.plot(vixAxes, vixChangePercent, "c-", label="vix")
-    # ax2.plot(spyData.axes[0], spyChangePercent, ".-", label="SPY")
-    # ax2.legend()
     ax1.plot(spyData.axes[0], spyClose, label="IWM")
     ax1.plot(transaction_dates, portfolio, "g.-", label="acct")
     for i in range(1, len(transaction_dates)):
