@@ -30,7 +30,7 @@ def getVix(start_date, end_date):
 def getRVXData(start_date, end_date):
     startDate = formatDateTime(start_date)
     endDate = formatDateTime(end_date)
-    data = pd.read_csv("rvxdailyprices.csv", skiprows=2)
+    data = pd.read_csv("data/rvx.csv", skiprows=2)
     # print data.head()
     # print data.shape
     # print data.columns
