@@ -50,6 +50,8 @@ if __name__ == "__main__":
     vixLen = vixClose.shape[0]
     print (ticker+" Len: ", num, ". vixLen:", vixLen)
 
+    assert num == vixLen
+
     spyChangePercent = np.zeros(num)
     vixChangePercent = np.ones(vixLen)
     print "start_date: ", start_date, ". end_date: ", end_date
@@ -104,9 +106,14 @@ if __name__ == "__main__":
     else:
         print "~~~~~~~~~~~~~~~ You BEAT the market ~~~~~~~~~~~~~~~"
 
-    plt.figure(figsize=[12, 8])
-    plt.plot(vixAxes, vixClose, "-", label="volitity index")
-    plt.plot(spyData.axes[0], spyClose, "-", label=ticker)
+    fig, ax1 = plt.subplots(figsize=[12, 8])
+    color = 'tab:red'
+    ax1.plot(vixAxes, vixClose, "r-", label="volitity index")
+    ax1.set_ylabel('volitity', color=color)
+    ax2 = ax1.twinx()
+    color = 'tab:blue'
+    ax2.plot(spyData.axes[0], spyClose, "b-", label=ticker)
+    ax2.set_ylabel(ticker, color=color)
     plt.legend()
 
     plt.xticks(rotation=90)
@@ -128,10 +135,12 @@ if __name__ == "__main__":
         ax1.plot(spyData.axes[0][i], spyClose[i], "g*")
     for i in bothRising:
         ax1.plot(spyData.axes[0][i], spyClose[i], "r*")
-    ax1.plot(spyData.axes[0][bothDropping[-1]],
-             spyClose[bothDropping[-1]], "g*", label="buy, both Dropping")
-    ax1.plot(spyData.axes[0][bothRising[-1]],
-             spyClose[bothRising[-1]], "r*", label="sell, both Rising")
+    if bothDropping:
+        ax1.plot(spyData.axes[0][bothDropping[-1]],
+                 spyClose[bothDropping[-1]], "g*", label="buy, both Dropping")
+    if bothRising:
+        ax1.plot(spyData.axes[0][bothRising[-1]],
+                 spyClose[bothRising[-1]], "r*", label="sell, both Rising")
     plt.title("timeStep: " + str(timeStep) + " days")
     plt.xticks(rotation=0)
     plt.grid()
