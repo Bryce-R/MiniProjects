@@ -15,16 +15,12 @@ register_matplotlib_converters()
 if __name__ == "__main__":
     # start_date = "2008-08-01"
     # end_date = "2009-09-06"
-    # start_date = "2019-01-01"
-    # end_date = "2020-06-06"
-    # start_date = "2017-01-01"
-    # end_date = "2018-01-01"
 
     start_date = "2016-01-01"
     end_date = "2019-01-01"
 
-    # start_date = "2019-03-01"
-    # end_date = "2020-06-06"
+    # start_date = "2019-01-01"
+    # end_date = "2020-06-11"
 
     timeStep = 1  # days
 
