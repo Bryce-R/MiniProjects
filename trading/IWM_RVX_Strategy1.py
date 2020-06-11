@@ -105,7 +105,7 @@ if __name__ == "__main__":
         print "~~~~~~~~~~~~~~~ You BEAT the market ~~~~~~~~~~~~~~~"
 
     plt.figure(figsize=[12, 8])
-    plt.plot(vixAxes, vixClose, "-", label="RVX")
+    plt.plot(vixAxes, vixClose, "-", label="volitity index")
     plt.plot(spyData.axes[0], spyClose, "-", label=ticker)
     plt.legend()
 
