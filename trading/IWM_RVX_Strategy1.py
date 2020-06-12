@@ -106,6 +106,8 @@ if __name__ == "__main__":
             wins += 1
     print "max_avg_attempt: ", max_avg_attempt
     print "winning rate: ", (1.0-wins/len(portfolio))*100.0
+    print "Portfolio end value: ", portfolio[-1], ". Performance: +", (
+        portfolio[-1] / portfolio[0]-1.0)*100.0, "%"
     print "Portfolio end value: ", portfolio[-1]
     print "Related Index fund: ", spyClose[-1]
     if(portfolio[-1] < spyClose[-1]):
