@@ -19,8 +19,8 @@ def runBackTest(start_date, end_date):
 
 
 if __name__ == "__main__":
-    start_date = "2008-08-01"
-    end_date = "2009-09-06"
+    # start_date = "2008-08-01"
+    # end_date = "2009-09-06"
 
     start_date = "2016-01-01"
     end_date = "2019-01-01"
@@ -36,16 +36,21 @@ if __name__ == "__main__":
 
     timeStep = 1  # days
 
-    ticker = "IWM"
-    spyData = Utils.getTickerData(ticker, start_date, end_date)
-    vixData = Utils.getRVXData(start_date, end_date)
-    vixClose = vixData['Close'].values
+    # ticker = "IWM"
+    # spyData = Utils.getTickerData(ticker, start_date, end_date)
+    # vixData = Utils.getRVXData(start_date, end_date)
+    # vixClose = vixData['Close'].values
 
     # ticker = "SPY"
-    # spyData = Utils.getTickerData("SPY", start_date, end_date)
+    # spyData = Utils.getTickerData(ticker, start_date, end_date)
     # vixData = Utils.getVixDataFromCSV(
     #     "data/vix.csv", start_date, end_date)
     # vixClose = vixData['VIX Close'].values
+
+    ticker = "GLD"
+    spyData = Utils.getTickerData(ticker, start_date, end_date)
+    vixData = Utils.getGVZDataFromCSV(start_date, end_date)
+    vixClose = vixData['GVZ'].values
 
     vixAxes = vixData['Date']
     spyClose = spyData.Close.to_numpy()
