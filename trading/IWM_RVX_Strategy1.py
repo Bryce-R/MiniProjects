@@ -22,27 +22,30 @@ if __name__ == "__main__":
     start_date = "2008-08-01"
     end_date = "2009-09-06"
 
-    # start_date = "2016-01-01"
-    # end_date = "2019-01-01"
+    start_date = "2016-01-01"
+    end_date = "2019-01-01"
 
     # start_date = "2019-01-01"
     # end_date = "2020-06-11"
 
-    start_date = "2006-01-01"
-    end_date = "2020-06-11"
+    # start_date = "2006-01-01"
+    # end_date = "2020-06-11"
+
+    # start_date = "2011-07-25"
+    # end_date = "2011-08-15"
 
     timeStep = 1  # days
 
-    # ticker = "IWM"
-    # spyData = Utils.getTickerData(ticker, start_date, end_date)
-    # vixData = Utils.getRVXData(start_date, end_date)
-    # vixClose = vixData['Close'].values
+    ticker = "IWM"
+    spyData = Utils.getTickerData(ticker, start_date, end_date)
+    vixData = Utils.getRVXData(start_date, end_date)
+    vixClose = vixData['Close'].values
 
-    ticker = "SPY"
-    spyData = Utils.getTickerData("SPY", start_date, end_date)
-    vixData = Utils.getVixDataFromCSV(
-        "data/vix.csv", start_date, end_date)
-    vixClose = vixData['VIX Close'].values
+    # ticker = "SPY"
+    # spyData = Utils.getTickerData("SPY", start_date, end_date)
+    # vixData = Utils.getVixDataFromCSV(
+    #     "data/vix.csv", start_date, end_date)
+    # vixClose = vixData['VIX Close'].values
 
     vixAxes = vixData['Date']
     spyClose = spyData.Close.to_numpy()
@@ -66,11 +69,10 @@ if __name__ == "__main__":
     bothDropping = []
     bothRising = []
     for i in range(1, num-1):
-        # if abs(spyChangePercent[i]) < 0.2:
-        #     continue
+
         if(spyChangePercent[i] > 0.0 and vixChangePercent[i] > 0.0):
             bothRising += [i]
-        if(spyChangePercent[i] < 0.0 and vixChangePercent[i] < 0.0):
+        if(spyChangePercent[i] < -0.0 and vixChangePercent[i] < 0.0 and vixChangePercent[i] < -0.3):
             bothDropping += [i]
 
     max_avg_attempt = 0
