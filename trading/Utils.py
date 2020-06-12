@@ -37,7 +37,7 @@ def getRVXData(start_date, end_date):
     # print data['Date']
 
     data['Date'] = pd.to_datetime(data['Date'])
-    mask = (data['Date'] >= startDate) & (data['Date'] <= endDate)
+    mask = (data['Date'] >= startDate) & (data['Date'] < endDate)
     # Date   Open   High    Low  Close
     return data[mask]
 
@@ -52,7 +52,7 @@ def getVixDataFromCSV(filename, start_date, end_date):
     # print data['Date']
 
     data['Date'] = pd.to_datetime(data['Date'])
-    mask = (data['Date'] >= startDate) & (data['Date'] <= endDate)
+    mask = (data['Date'] >= startDate) & (data['Date'] < endDate)
     # Date   Open   High    Low  Close
     return data[mask]
 
