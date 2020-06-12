@@ -57,5 +57,16 @@ def getVixDataFromCSV(filename, start_date, end_date):
     return data[mask]
 
 
+def getGVZDataFromCSV(start_date, end_date):
+    startDate = formatDateTime(start_date)
+    endDate = formatDateTime(end_date)
+    data = pd.read_csv("data/gvx.csv", skiprows=1)
+    print data.head()
+    data['Date'] = pd.to_datetime(data['Date'])
+    mask = (data['Date'] >= startDate) & (data['Date'] < endDate)
+    # Date   GVZ
+    return data[mask]
+
+
 if __name__ == "__main__":
     pass
