@@ -20,7 +20,7 @@ from tqdm import tqdm
 
 # https://blog.gofynd.com/building-a-deep-q-network-in-pytorch-fa1086aa5435
 
-env = gym.make('CartPole-v0')
+env = gym.make('MountainCar-v0')
 input_dim = env.observation_space.shape[0]
 output_dim = env.action_space.n
 exp_replay_size = 256
@@ -44,7 +44,7 @@ for i in range(exp_replay_size):
 # Main training loop
 losses_list, reward_list, episode_len_list, epsilon_list = [], [], [], []
 index = 128
-episodes = 5000  # 10000
+episodes = 200  # 10000
 epsilon = 1
 
 for i in tqdm(range(episodes)):
@@ -70,16 +70,10 @@ for i in tqdm(range(episodes)):
     losses_list.append(losses/ep_len), reward_list.append(
         rew), episode_len_list.append(ep_len), epsilon_list.append(epsilon)
 
-
-fig, axs = plt.subplots(3, 1)
-axs[0].plot(losses_list)
-axs[0].set_ylabel('loss')
-axs[1].plot(range(len(reward_list)), reward_list)
-axs[1].set_ylabel('reward')
-axs[2].plot(range(len(epsilon_list)), epsilon_list)
-axs[0].set_ylabel('epsilon')
-
-plt.show()
+plt.figure()
+plt.plot(losses_list)
+plt.title("loss")
+plt.show(block=False)
 
 for i in tqdm(range(2)):
     obs, done, rew = env.reset(), False, 0
