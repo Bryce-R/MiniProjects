@@ -119,7 +119,7 @@ def GD(x0):
 
 
 def BarrierGD(x0):
-    maxIter = 8
+    maxIter = 10
     maxInnerIter = 30
 
     x = x0
@@ -139,6 +139,7 @@ def BarrierGD(x0):
     # cons, dCons, barrierCons = circle, dcircle, circleBarrier
     k = 1
     # infeasibility handling
+    step = 0.3
     while cons(x[0], x[1]) > 0.0:
         # infeasible
         gradient = dCons(x[0], x[1])
@@ -156,12 +157,13 @@ def BarrierGD(x0):
     print("Ran {} iters of infeasibility steps.".format(k-1))
     for i in range(maxIter):
         step = 0.3
+        # centering step
         for j in range(maxInnerIter):
             before_cost = t*f1(x[0], x[1]) - barrierCons(x[0], x[1])
             gradient = t*df1(x[0], x[1]) - dCons(x[0], x[1])
             if np.linalg.norm(gradient) < 1e-5:
                 print(
-                    "iter: {}, innerIter: {}. gradien norm < 1e-5, exiting inner loop.".format(i, j))
+                    "outer iter: {}, innerIter: {}. gradien norm < 1e-5, exiting inner loop.".format(i, j))
                 break
             while step >= step_tol:
                 x_after = x - step*gradient
@@ -182,8 +184,10 @@ def BarrierGD(x0):
                     step /= 2.0
             if (step < step_tol):
                 print(
-                    'iter: {}, innerIter: {}. step < tol, exiting inner loop.'.format(i, j))
+                    'outer iter: {}, innerIter: {}. step < tol, exiting inner loop.'.format(i, j))
                 break
+        print(
+            'iter: {}, exiting outer iter {}.'.format(k, i))
         t = t*mu
         if t >= max_t:
             print("exit, t = {}".format(t))
@@ -192,11 +196,14 @@ def BarrierGD(x0):
     return x_history
 
 
-x0 = np.array([0.1, 0.1], dtype=np.double)
-# x0 = np.array([-0.1, -0.1],dtype=np.double)
+# x0 = np.array([0.1, 0.1], dtype=np.double)
+# x0 = np.array([-0.1, -0.1], dtype=np.double)
 # x0 = np.array([-0.5, 0.5],dtype=np.double)
 # x0 = np.array([0.5, -0.5],dtype=np.double)
-# x0 = np.array([-0.5, 1.2],dtype=np.double)
+x0 = np.array([-0.5, 1.2], dtype=np.double)  # infeasible intial solution
+
+# closer to solution but not on center path
+# x0 = np.array([-0.6, -0.4], dtype=np.double)
 
 # opt = GD
 opt = BarrierGD
