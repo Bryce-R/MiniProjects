@@ -208,7 +208,8 @@ print('Optimal solution x1 = {}, x2 = {}.'.format(
 # print(x_history)
 print(f1(x_history[0, -1], x_history[1, -1]))
 # plt.figure(figsize=(12, 9))
-plt.figure(figsize=(16, 12))
+# plt.figure(figsize=(16, 12))
+plt.figure(figsize=(8, 6))
 plt.plot(x_history[0, :], x_history[1, :], '.:', label='history')
 plt.plot(x_history[0, 0], x_history[1, 0], 's', label='init')
 # for i in range(1, x_history.shape[1]):
@@ -227,10 +228,11 @@ plt.title("min(x1 + x2)")
 plt.xlabel("x1")
 plt.ylabel("x2")
 plt.grid()
-plt.show()
+plt.show(block=False)
 
-plt.figure(figsize=(12, 9))
+# plt.figure(figsize=(12, 9))
 # plt.figure(figsize=(16, 12))
+plt.figure(figsize=(8, 6))
 
 plt.subplot(2, 1, 1)
 plt.plot(x_history[0, :], '.-')
