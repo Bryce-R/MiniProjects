@@ -10,6 +10,7 @@ Original file is located at
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 ks = np.array([1.0, 1.0], dtype=np.double)
 
 
@@ -21,26 +22,36 @@ def df1(x1, x2):
     return ks
 
 
-def circle(x1, x2):
-    return x1**2 + x2**2 - 1
+class circle:
+    _k1 = 1.0
+    _k2 = 1.0
+    _r = 1
 
+    def __init__(self, params):
+        if len(params) != 0:
+            print("params unpack not implemented.")
+            pass
 
-def dcircle(x1, x2):
-    return np.array([2.0*x1, 2.0*x2], dtype=np.double)/circle(x1, x2)
+    def cons(self, x):
+        return self._k1*x[0]**2 + self._k2*x[1]**2 - self._r
 
+    def deriv(self, x):
+        return np.array([self._k1*2.0*x[0], self._k2*2.0*x[1]], dtype=np.double)/self.cons(x)
 
-def circleBarrier(x1, x2):
-    return np.log(-circle(x1, x2))
+    def barrier(self, x):
+        c = self.cons(x)
+        if (c > 0.0):
+            print("function is infeasible!")
+        return -np.log(-c)
 
-
-def drawCircle():
-    num = 101
-    rad = np.pi/(num-1)*2
-    x = np.zeros((2, num), dtype=np.double)
-    for i in range(num):
-        x[0, i] = np.cos(i*rad)
-        x[1, i] = np.sin(i*rad)
-    return x
+    def boundary(self):
+        num = 101
+        rad = np.pi/(num-1)*2
+        x = np.zeros((2, num), dtype=np.double)
+        for i in range(num):
+            x[0, i] = self._r*np.cos(i*rad)
+            x[1, i] = self._r*np.sin(i*rad)
+        return x
 
 
 def linear(x1, x2, k1, k2, c):
@@ -94,7 +105,7 @@ def linearAndCircle(x1, x2):
 
 
 def linearAndCircleBarrier(x1, x2):
-    return np.log(-linear1(x1, x2)) + np.log(-circle(x1, x2))
+    return -np.log(-linear1(x1, x2)) - np.log(-circle(x1, x2))
 
 
 def dlinearAndCircle(x1, x2):
@@ -135,18 +146,20 @@ def BarrierGD(x0):
     # g(x)<=0.0
     # d(phi(x))/dx = - (d(gx)/dx) / g(x)
     # constraint function, constraint function derivative, linearAndCircleBarrier
-    cons, dCons, barrierCons = linearAndCircle, dlinearAndCircle, linearAndCircleBarrier
+    # cons, dCons, barrierCons = linearAndCircle, dlinearAndCircle, linearAndCircleBarrier
     # cons, dCons, barrierCons = circle, dcircle, circleBarrier
+    constraints = circle([])
+    cons, dCons, barrierCons = constraints.cons, constraints.deriv, constraints.barrier
     k = 1
     # infeasibility handling
     step = 0.3
-    while cons(x[0], x[1]) > 0.0:
+    while cons(x) > 0.0:
         # infeasible
-        gradient = dCons(x[0], x[1])
-        before_cost = cons(x[0], x[1])
+        gradient = dCons(x)
+        before_cost = cons(x)
         while step >= step_tol:
             x_after = x - step*gradient
-            after_cost = cons(x_after[0], x_after[1])
+            after_cost = cons(x_after)
             if after_cost < before_cost:
                 x_history[:, k] = x_after
                 x = x_after
@@ -159,19 +172,19 @@ def BarrierGD(x0):
         step = 0.3
         # centering step
         for j in range(maxInnerIter):
-            before_cost = t*f1(x[0], x[1]) - barrierCons(x[0], x[1])
-            gradient = t*df1(x[0], x[1]) - dCons(x[0], x[1])
+            before_cost = t*f1(x[0], x[1]) + barrierCons(x)
+            gradient = t*df1(x[0], x[1]) - dCons(x)
             if np.linalg.norm(gradient) < 1e-5:
                 print(
                     "outer iter: {}, innerIter: {}. gradien norm < 1e-5, exiting inner loop.".format(i, j))
                 break
             while step >= step_tol:
                 x_after = x - step*gradient
-                if cons(x_after[0], x_after[1]) >= -1e-5:
+                if cons(x_after) >= -1e-5:
                     step /= 2.0
                     continue
-                after_cost = t*f1(x_after[0], x_after[1]) - \
-                    barrierCons(x_after[0], x_after[1])
+                after_cost = t*f1(x_after[0], x_after[1]
+                                  ) + barrierCons(x_after)
                 # print(t*f1(x[0], x[1]), barrierCons(x[0], x[1]))
                 # print("before_cost, gradient, after_cost:", before_cost, gradient, after_cost)
                 if after_cost < before_cost:
@@ -225,7 +238,9 @@ plt.plot(x_history[0, 0], x_history[1, 0], 's', label='init')
 #   plt.arrow(x_history[0,i-1], x_history[1,i-1], dx, dy, head_width=0.04, head_length=0.1, linewidth=1, color='r', length_includes_head=True)
 
 plt.plot([-np.sqrt(2)/2], [-np.sqrt(2)/2], 'o', label='solution')
-boundary = drawCircle()
+
+constraints = circle([])
+boundary = constraints.boundary()
 plt.plot(boundary[0, :], boundary[1, :], '--', label='constraint boundary')
 boundary = drawLinear1()
 plt.plot(boundary[0, :], boundary[1, :], '--', label='constraint boundary')
