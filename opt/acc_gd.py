@@ -9,7 +9,7 @@ ks = np.array([[a], [b]], dtype=np.double)
 
 
 def f1(x):
-    return ks[0]*x[0] ^ 2 + ks[1]*x[1] ^ 2
+    return ks[0]*x[0] ** 2 + ks[1]*x[1] ** 2
 
 
 def df1(x):
@@ -39,11 +39,26 @@ def GD(x0, f, df):
     x_history[:, 0] = x0[:, 0]
     step = 0.2
     k = 1
-
+    step_tol = 1e-8
+    printDebug = True
     for i in range(1, maxIter):
-        x -= step*df(x)
-        x_history[:, k] = x[:, 0]
-        k += 1
+        before_cost = f(x)
+        gradient = df(x)
+        while step >= step_tol:
+            x_after = x - step*gradient
+            after_cost = f(x_after)
+            if after_cost < before_cost:
+                x_history[:, k] = x_after[:, 0]
+                x = x_after
+                k += 1
+                break
+            else:
+                step /= 2.0
+        if (step < step_tol):
+            if printDebug:
+                print(
+                    'Iter: {}: step < tol, exiting.'.format(i))
+            break
     x_history = x_history[:, :k]
     return x_history, k
 
@@ -88,7 +103,7 @@ else:
     i = 1
     for boundary in boundaries:
         plt.plot(boundary[0, :], boundary[1, :],
-                 '--', label='constraint ' + str(i))
+                 '--', label='level-' + str(i))
         i += 1
 
     plt.axis('equal')
