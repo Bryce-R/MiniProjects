@@ -192,7 +192,7 @@ def BarrierGD(x0, constraints):
                 step /= 2.0
     print("{} iters of infeasibility steps.".format(k-1))
     for i in range(maxIter):
-        # centering step
+        # centering step, bring solution x to the central path
         for j in range(maxInnerIter):
             before_cost = t*f1(x[0], x[1]) + barrierCons(x)
             gradient = t*df1(x[0], x[1]) + dCons(x)
@@ -247,8 +247,8 @@ x0 = np.reshape(x0, (2, 1))
 # opt = GD
 opt = BarrierGD
 
-constraints = circle([])
-# constraints = linearCons([])
+# constraints = circle([])
+constraints = linearCons([])
 print("-------------------Starting Optimization---------------------------")
 x_history = opt(x0, constraints)
 print("Total iterations: ", format(x_history.shape[1]))
