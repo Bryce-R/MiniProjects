@@ -47,13 +47,15 @@ class circle:
         return -np.log(-c)
 
     def boundary(self):
+        boundaries = []
         num = 101
         rad = np.pi/(num-1)*2
         x = np.zeros((2, num), dtype=np.double)
         for i in range(num):
             x[0, i] = self._r*np.cos(i*rad)
             x[1, i] = self._r*np.sin(i*rad)
-        return x
+        boundaries += [x]
+        return boundaries
 
 
 def linear(x1, x2, k1, k2, c):
@@ -157,25 +159,27 @@ def drawLinear1():
 #     return dlinear1(x1, x2) + dcircle(x1, x2)
 
 
-def GD(x0):
+def GD(x0, constraint):
     x = x0
     maxIter = 200
     x_history = np.zeros((2, maxIter), dtype=np.double)
     x_history[:, 0] = x0
     step = 0.2
     k = 1
+
+    cons, dCons = constraints.cons, constraints.deriv
     for i in range(1, maxIter):
         x -= step*df1(x[0], x[1])
         x_history[:, k] = x
         k += 1
-        if circle(x[0], x[1]) >= 0.0:
+        if cons(x) >= 0.0:
             break
     x_history = x_history[:, :k]
     return x_history
 
 
-def BarrierGD(x0):
-    maxIter = 5
+def BarrierGD(x0, constraints):
+    maxIter = 8
     maxInnerIter = 30
 
     x = x0
@@ -191,10 +195,6 @@ def BarrierGD(x0):
     # g(x)<=0.0
     # d(phi(x))/dx = - (d(gx)/dx) / g(x)
     # constraint function, constraint function derivative, linearAndCircleBarrier
-    # cons, dCons, barrierCons = linearAndCircle, dlinearAndCircle, linearAndCircleBarrier
-    # cons, dCons, barrierCons = circle, dcircle, circleBarrier
-    # constraints = circle([])
-    constraints = linearCons([])
     cons, dCons, barrierCons = constraints.cons, constraints.deriv, constraints.barrier
     k = 1
     # infeasibility handling
@@ -213,7 +213,7 @@ def BarrierGD(x0):
                 break
             else:
                 step /= 2.0
-    print("Ran {} iters of infeasibility steps.".format(k-1))
+    print("{} iters of infeasibility steps.".format(k-1))
     for i in range(maxIter):
         step = 0.3
         # centering step
@@ -228,15 +228,13 @@ def BarrierGD(x0):
             while step >= step_tol:
                 x_after = x - step*gradient
                 # print("x, gradient, x_after", x, gradient, x_after)
-                if cons(x_after) >= -1e-5:
+                if cons(x_after) >= -1e-8:
+                    # print("violating constraints, halfing step size.")
                     # print('cons(x_after):', cons(x_after))
                     step /= 2.0
                     continue
                 after_cost = t*f1(x_after[0], x_after[1]
-                                  ) + barrierCons(x)
-                # print("before_cost, after_cost:", before_cost, after_cost)
-                # print(t*f1(x[0], x[1]), barrierCons(x[0], x[1]))
-                # print("before_cost, gradient, after_cost:", before_cost, gradient, after_cost)
+                                  ) + barrierCons(x_after)
                 if after_cost < before_cost:
                     x_history[:, k] = x_after[:, 0]
                     x = x_after
@@ -249,8 +247,8 @@ def BarrierGD(x0):
                 print(
                     'outer iter: {}, innerIter: {}. step < tol, exiting inner loop.'.format(i, j))
                 break
-        print(
-            'iter: {}, exiting outer iter {}.'.format(k, i))
+        # print(
+        #     'iter: {}, exiting outer iter {}.'.format(k, i))
         t = t*mu
         if t >= max_t:
             print("exit, t = {}".format(t))
@@ -262,7 +260,7 @@ def BarrierGD(x0):
 x0 = np.array([0.2, 0.4], dtype=np.double)
 # x0 = np.array([-0.1, -0.1], dtype=np.double)
 # x0 = np.array([-0.5, 0.5],dtype=np.double)
-# x0 = np.array([0.5, -0.4], dtype=np.double)
+x0 = np.array([0.6, -0.4], dtype=np.double)
 # x0 = np.array([-0.5, 1.2], dtype=np.double)  # infeasible intial solution
 
 # closer to solution but not on center path
@@ -271,7 +269,10 @@ x0 = np.reshape(x0, (2, 1))
 # opt = GD
 opt = BarrierGD
 
-x_history = opt(x0)
+constraints = circle([])
+# constraints = linearCons([])
+
+x_history = opt(x0, constraints)
 # '{:-9} YES votes  {:2.2%}'.format(yes_votes, percentage)
 print('Optimal solution x1 = {}, x2 = {}.'.format(
     x_history[0, -1], x_history[1, -1]))
@@ -289,11 +290,11 @@ plt.plot(x_history[0, 0], x_history[1, 0], 's', label='init')
 
 plt.plot([-np.sqrt(2)/2], [-np.sqrt(2)/2], 'o', label='solution')
 
-constraints = circle([])
-boundary = constraints.boundary()
-plt.plot(boundary[0, :], boundary[1, :], '--', label='constraint boundary')
-boundary = drawLinear1()
-plt.plot(boundary[0, :], boundary[1, :], '--', label='constraint boundary')
+boundaries = constraints.boundary()
+for boundary in boundaries:
+    plt.plot(boundary[0, :], boundary[1, :], '--', label='constraint boundary')
+# boundary = drawLinear1()
+# plt.plot(boundary[0, :], boundary[1, :], '--', label='constraint boundary')
 plt.axis('equal')
 plt.legend()
 plt.title("min(x1 + x2)")
