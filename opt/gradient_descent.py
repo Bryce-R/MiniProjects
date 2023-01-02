@@ -23,7 +23,7 @@ def df1(x1, x2):
     return ks
 
 
-def GD(x0, constraint):
+def GD(x0, constraint, f, df):
     x = x0
     maxIter = 200
     x_history = np.zeros((2, maxIter), dtype=np.double)
@@ -31,13 +31,10 @@ def GD(x0, constraint):
     step = 0.2
     k = 1
 
-    cons = constraints.cons
     for i in range(1, maxIter):
         x -= step*df1(x[0], x[1])
         x_history[:, k] = x
         k += 1
-        if cons(x) >= 0.0:
-            break
     x_history = x_history[:, :k]
     return x_history
 
@@ -129,14 +126,6 @@ def BarrierGD(x0, constraints):
     return x_history, k
 
 
-# x0 = np.array([0.2, 0.4], dtype=np.double)
-# x1 = np.array([-0.1, -0.1], dtype=np.double)
-# x2 = np.array([-0.5, 0.5], dtype=np.double)
-# x3 = np.array([0.6, -0.4], dtype=np.double)
-# x4 = np.array([-0.5, 1.2], dtype=np.double)  # infeasible intial solution
-
-# # closer to solution but not on center path
-# x5 = np.array([-0.6, -0.4], dtype=np.double)
 
 x = np.zeros((2, 6), dtype=np.double)
 x[:, 0] = np.array([0.2, 0.4], dtype=np.double)
