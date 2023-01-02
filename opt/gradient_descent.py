@@ -71,19 +71,19 @@ def drawLinear(k1, k2, c):
     x = np.zeros((2, num), dtype=np.double)
     if k1 == 0.0:
         x[0, 0] = -2.0
-        x[1, 0] = c/k2
+        x[1, 0] = -c/k2
         x[0, 1] = 2.0
-        x[1, 1] = c/k2
+        x[1, 1] = -c/k2
     elif k2 == 0.0:
-        x[0, 0] = c/k1
+        x[0, 0] = -c/k1
         x[1, 0] = -2.0
-        x[0, 1] = c/k1
+        x[0, 1] = -c/k1
         x[1, 1] = 2.0
     else:
-        x[0, 0] = c/k1
+        x[0, 0] = -c/k1
         x[1, 0] = 0.0
         x[0, 1] = 0.0
-        x[1, 1] = c/k2
+        x[1, 1] = -c/k2
     return x
 
 
@@ -127,36 +127,11 @@ class linearCons:
         return res
 
     def boundary(self):
-        pass
-
-
-k1 = 0.0
-k2 = -1.0
-c = 0.5
-
-
-# def linear1(x1, x2):
-#     return linear(x1, x2, k1, k2, c)
-
-
-# def dlinear1(x1, x2):
-#     return dlinear(x1, x2, k1, k2)/linear(x1, x2, k1, k2, c)
-
-
-def drawLinear1():
-    return drawLinear(k1, k2, c)
-
-
-# def linearAndCircle(x1, x2):
-#     return np.maximum(linear1(x1, x2), circle(x1, x2))
-
-
-# def linearAndCircleBarrier(x1, x2):
-#     return -np.log(-linear1(x1, x2)) - np.log(-circle(x1, x2))
-
-
-# def dlinearAndCircle(x1, x2):
-#     return dlinear1(x1, x2) + dcircle(x1, x2)
+        boundaries = []
+        for i in range(len(self._kx)):
+            x = drawLinear(self._kx[i], self._ky[i], self._c[i])
+            boundaries += [x]
+        return boundaries
 
 
 def GD(x0, constraint):
@@ -270,12 +245,12 @@ x0 = np.reshape(x0, (2, 1))
 # opt = GD
 opt = BarrierGD
 
-constraints = circle([])
-# constraints = linearCons([])
+# constraints = circle([])
+constraints = linearCons([])
 
 x_history = opt(x0, constraints)
 # '{:-9} YES votes  {:2.2%}'.format(yes_votes, percentage)
-print('Optimal solution x1 = {}, x2 = {}.'.format(
+print('Calculated Optimal solution x1 = {}, x2 = {}.'.format(
     x_history[0, -1], x_history[1, -1]))
 # print(x_history)
 print(f1(x_history[0, -1], x_history[1, -1]))
@@ -288,14 +263,16 @@ plt.plot(x_history[0, 0], x_history[1, 0], 's', label='init')
 #   dx = x_history[0,i] - x_history[0,i-1]
 #   dy = x_history[1,i] - x_history[1,i-1]
 #   plt.arrow(x_history[0,i-1], x_history[1,i-1], dx, dy, head_width=0.04, head_length=0.1, linewidth=1, color='r', length_includes_head=True)
-
-plt.plot([-np.sqrt(2)/2], [-np.sqrt(2)/2], 'o', label='solution')
+plt.plot(x_history[0, -1], x_history[1, -1], 'o', label='solution')
+# plt.plot([-np.sqrt(2)/2], [-np.sqrt(2)/2], 'o', label='solution')
 
 boundaries = constraints.boundary()
+i = 1
 for boundary in boundaries:
-    plt.plot(boundary[0, :], boundary[1, :], '--', label='constraint boundary')
-# boundary = drawLinear1()
-# plt.plot(boundary[0, :], boundary[1, :], '--', label='constraint boundary')
+    plt.plot(boundary[0, :], boundary[1, :],
+             '--', label='constraint ' + str(i))
+    i += 1
+
 plt.axis('equal')
 plt.legend()
 plt.title("min(x1 + x2)")
