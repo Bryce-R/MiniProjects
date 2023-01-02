@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-ks = np.array([1.0, 1.0], dtype=np.double)
+ks = np.array([[1.0], [1.0]], dtype=np.double)
 
 
 def f1(x1, x2):
@@ -36,7 +36,9 @@ class circle:
         return self._k1*x[0]**2 + self._k2*x[1]**2 - self._r
 
     def deriv(self, x):
-        return np.array([self._k1*2.0*x[0], self._k2*2.0*x[1]], dtype=np.double)/self.cons(x)
+        dfdx = -np.array(
+            [self._k1*2.0*x[0], self._k2*2.0*x[1]], dtype=np.double)
+        return np.reshape(dfdx, (2, 1)) / self.cons(x)
 
     def barrier(self, x):
         c = self.cons(x)
@@ -55,11 +57,11 @@ class circle:
 
 
 def linear(x1, x2, k1, k2, c):
-    return x1*k1 + x2*k2 - c
+    return x1*k1 + x2*k2 + c
 
 
 def dlinear(x1, x2, k1, k2):
-    return np.array([k1, k2], dtype=np.double)
+    return np.array([[k1], [k2]], dtype=np.double)
 
 
 def drawLinear(k1, k2, c):
@@ -83,33 +85,76 @@ def drawLinear(k1, k2, c):
     return x
 
 
+class linearCons:
+    _kx = [0.0, -1.0]
+    _ky = [-1.0, 0.0]
+    _c = [-0.5, -0.5]
+
+    def __init__(self, params):
+        if len(params) != 0:
+            print("params unpack not implemented.")
+            pass
+
+    def cons(self, x):
+        res = -np.inf
+        for i in range(len(self._kx)):
+            f = linear(
+                x[0], x[1], self._kx[i], self._ky[i], self._c[i])
+            res = max(res, f)
+            # print("res, f", res, f)
+        return res
+
+    def deriv(self, x):
+        res = np.zeros((2, 1), dtype=np.double)
+        for i in range(len(self._kx)):
+            grad = -dlinear(x[0], x[1], self._kx[i], self._ky[i])
+            f = linear(
+                x[0], x[1], self._kx[i], self._ky[i], self._c[i])
+            # print("grad, f", grad, f)
+            res += grad/f
+        return res
+
+    def barrier(self, x):
+        res = 0.0
+        for i in range(len(self._kx)):
+            f = linear(
+                x[0], x[1], self._kx[i], self._ky[i], self._c[i])
+            if (f > 0.0):
+                print("function is infeasible!")
+            res += -np.log(-f)
+        return res
+
+    def boundary(self):
+        pass
+
+
 k1 = 0.0
 k2 = -1.0
 c = 0.5
 
 
-def linear1(x1, x2):
-    return linear(x1, x2, k1, k2, c)
+# def linear1(x1, x2):
+#     return linear(x1, x2, k1, k2, c)
 
 
-def dlinear1(x1, x2):
-    return dlinear(x1, x2, k1, k2)/linear(x1, x2, k1, k2, c)
+# def dlinear1(x1, x2):
+#     return dlinear(x1, x2, k1, k2)/linear(x1, x2, k1, k2, c)
 
 
 def drawLinear1():
     return drawLinear(k1, k2, c)
 
 
-def linearAndCircle(x1, x2):
-    return np.maximum(linear1(x1, x2), circle(x1, x2))
+# def linearAndCircle(x1, x2):
+#     return np.maximum(linear1(x1, x2), circle(x1, x2))
 
 
-def linearAndCircleBarrier(x1, x2):
-    return -np.log(-linear1(x1, x2)) - np.log(-circle(x1, x2))
+# def linearAndCircleBarrier(x1, x2):
+#     return -np.log(-linear1(x1, x2)) - np.log(-circle(x1, x2))
 
 
-def dlinearAndCircle(x1, x2):
-    return dlinear1(x1, x2) + dcircle(x1, x2)
+# def dlinearAndCircle(x1, x2):
+#     return dlinear1(x1, x2) + dcircle(x1, x2)
 
 
 def GD(x0):
@@ -130,12 +175,12 @@ def GD(x0):
 
 
 def BarrierGD(x0):
-    maxIter = 10
+    maxIter = 5
     maxInnerIter = 30
 
     x = x0
     x_history = np.zeros((2, maxIter*maxInnerIter+1), dtype=np.double)
-    x_history[:, 0] = x0
+    x_history[:, 0] = x0[:, 0]
 
     t = 1.0
     mu = 5.0  # t is scaled by this each outer iteration
@@ -148,7 +193,8 @@ def BarrierGD(x0):
     # constraint function, constraint function derivative, linearAndCircleBarrier
     # cons, dCons, barrierCons = linearAndCircle, dlinearAndCircle, linearAndCircleBarrier
     # cons, dCons, barrierCons = circle, dcircle, circleBarrier
-    constraints = circle([])
+    # constraints = circle([])
+    constraints = linearCons([])
     cons, dCons, barrierCons = constraints.cons, constraints.deriv, constraints.barrier
     k = 1
     # infeasibility handling
@@ -173,22 +219,26 @@ def BarrierGD(x0):
         # centering step
         for j in range(maxInnerIter):
             before_cost = t*f1(x[0], x[1]) + barrierCons(x)
-            gradient = t*df1(x[0], x[1]) - dCons(x)
+            gradient = t*df1(x[0], x[1]) + dCons(x)
+            # print("x, gradient, dCons(x)", x, gradient, dCons(x))
             if np.linalg.norm(gradient) < 1e-5:
                 print(
                     "outer iter: {}, innerIter: {}. gradien norm < 1e-5, exiting inner loop.".format(i, j))
                 break
             while step >= step_tol:
                 x_after = x - step*gradient
+                # print("x, gradient, x_after", x, gradient, x_after)
                 if cons(x_after) >= -1e-5:
+                    # print('cons(x_after):', cons(x_after))
                     step /= 2.0
                     continue
                 after_cost = t*f1(x_after[0], x_after[1]
-                                  ) + barrierCons(x_after)
+                                  ) + barrierCons(x)
+                # print("before_cost, after_cost:", before_cost, after_cost)
                 # print(t*f1(x[0], x[1]), barrierCons(x[0], x[1]))
                 # print("before_cost, gradient, after_cost:", before_cost, gradient, after_cost)
                 if after_cost < before_cost:
-                    x_history[:, k] = x_after
+                    x_history[:, k] = x_after[:, 0]
                     x = x_after
                     k += 1
                     # print("step, gradient, x: ",step, gradient, x)
@@ -209,15 +259,15 @@ def BarrierGD(x0):
     return x_history
 
 
-# x0 = np.array([0.1, 0.1], dtype=np.double)
+x0 = np.array([0.2, 0.4], dtype=np.double)
 # x0 = np.array([-0.1, -0.1], dtype=np.double)
 # x0 = np.array([-0.5, 0.5],dtype=np.double)
-# x0 = np.array([0.5, -0.5],dtype=np.double)
-x0 = np.array([-0.5, 1.2], dtype=np.double)  # infeasible intial solution
+# x0 = np.array([0.5, -0.4], dtype=np.double)
+# x0 = np.array([-0.5, 1.2], dtype=np.double)  # infeasible intial solution
 
 # closer to solution but not on center path
 # x0 = np.array([-0.6, -0.4], dtype=np.double)
-
+x0 = np.reshape(x0, (2, 1))
 # opt = GD
 opt = BarrierGD
 
@@ -254,14 +304,14 @@ plt.show(block=False)
 
 # plt.figure(figsize=(12, 9))
 # plt.figure(figsize=(16, 12))
-plt.figure(figsize=(8, 6))
+# plt.figure(figsize=(8, 6))
 
-plt.subplot(2, 1, 1)
-plt.plot(x_history[0, :], '.-')
-plt.ylabel("x1")
-plt.grid()
-plt.subplot(2, 1, 2)
-plt.plot(x_history[1, :], '.-')
-plt.ylabel("x2")
-plt.grid()
+# plt.subplot(2, 1, 1)
+# plt.plot(x_history[0, :], '.-')
+# plt.ylabel("x1")
+# plt.grid()
+# plt.subplot(2, 1, 2)
+# plt.plot(x_history[1, :], '.-')
+# plt.ylabel("x2")
+# plt.grid()
 plt.show()
