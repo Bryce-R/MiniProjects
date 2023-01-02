@@ -15,6 +15,11 @@ class circle:
     def cons(self, x):
         return self._k1*x[0]**2 + self._k2*x[1]**2 - self._r
 
+    def deriv(self, x):
+        dfdx = np.array(
+            [self._k1*2.0*x[0], self._k2*2.0*x[1]], dtype=np.double)
+        return np.reshape(dfdx, (2, 1))
+
     def derivBarrier(self, x):
         dfdx = -np.array(
             [self._k1*2.0*x[0], self._k2*2.0*x[1]], dtype=np.double)
