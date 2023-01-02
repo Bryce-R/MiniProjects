@@ -173,7 +173,7 @@ def BarrierGD(x0, constraints):
     cons, dCons, barrierCons = constraints.cons, constraints.deriv, constraints.barrier
     k = 1
     # infeasibility handling
-    step = 0.3
+    step = 0.1
     while cons(x) > 0.0:
         # infeasible
         gradient = dCons(x)
@@ -235,8 +235,8 @@ def BarrierGD(x0, constraints):
 
 x0 = np.array([0.2, 0.4], dtype=np.double)
 # x0 = np.array([-0.1, -0.1], dtype=np.double)
-# x0 = np.array([-0.5, 0.5],dtype=np.double)
-x0 = np.array([0.6, -0.4], dtype=np.double)
+# x0 = np.array([-0.5, 0.5], dtype=np.double)
+# x0 = np.array([0.6, -0.4], dtype=np.double)
 # x0 = np.array([-0.5, 1.2], dtype=np.double)  # infeasible intial solution
 
 # closer to solution but not on center path
@@ -247,13 +247,13 @@ opt = BarrierGD
 
 # constraints = circle([])
 constraints = linearCons([])
-
+print("-------------------Starting Optimization---------------------------")
 x_history = opt(x0, constraints)
-# '{:-9} YES votes  {:2.2%}'.format(yes_votes, percentage)
+print("Total iterations: ", format(x_history.shape[1]))
 print('Calculated Optimal solution x1 = {}, x2 = {}.'.format(
     x_history[0, -1], x_history[1, -1]))
 # print(x_history)
-print(f1(x_history[0, -1], x_history[1, -1]))
+print("optimal cost: ", f1(x_history[0, -1], x_history[1, -1])[0])
 # plt.figure(figsize=(12, 9))
 # plt.figure(figsize=(16, 12))
 plt.figure(figsize=(8, 6))
@@ -283,14 +283,14 @@ plt.show(block=False)
 
 # plt.figure(figsize=(12, 9))
 # plt.figure(figsize=(16, 12))
-# plt.figure(figsize=(8, 6))
 
-# plt.subplot(2, 1, 1)
-# plt.plot(x_history[0, :], '.-')
-# plt.ylabel("x1")
-# plt.grid()
-# plt.subplot(2, 1, 2)
-# plt.plot(x_history[1, :], '.-')
-# plt.ylabel("x2")
-# plt.grid()
+plt.figure(figsize=(8, 6))
+plt.subplot(2, 1, 1)
+plt.plot(x_history[0, :], '.-')
+plt.ylabel("x1")
+plt.grid()
+plt.subplot(2, 1, 2)
+plt.plot(x_history[1, :], '.-')
+plt.ylabel("x2")
+plt.grid()
 plt.show()
