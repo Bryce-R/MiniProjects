@@ -45,7 +45,7 @@ def GD(x0, constraint):
 def BarrierGD(x0, constraints):
     maxIter = 8
     maxInnerIter = 30
-
+    printDebug = False
     x = x0
     x_history = np.zeros((2, maxIter*maxInnerIter+1), dtype=np.double)
     x_history[:, 0] = x0[:, 0]
@@ -77,7 +77,8 @@ def BarrierGD(x0, constraints):
                 break
             else:
                 step /= 2.0
-    print("{} iters of infeasibility steps.".format(k-1))
+    if printDebug:
+        print("{} iters of infeasibility steps.".format(k-1))
     step = 0.1
     for i in range(maxIter):
         # centering step, bring solution x to the central path
@@ -86,14 +87,16 @@ def BarrierGD(x0, constraints):
             gradient = t*df1(x[0], x[1]) + barrierDeriv(x)
             # print("x, gradient, barrierDeriv(x)", x, gradient, barrierDeriv(x))
             if np.linalg.norm(gradient) < 1e-5:
-                print(
-                    "outer iter: {}, innerIter: {}. gradien norm < 1e-5, exiting inner loop.".format(i, j))
+                if printDebug:
+                    print(
+                        "outer iter: {}, innerIter: {}. gradien norm < 1e-5, exiting inner loop.".format(i, j))
                 break
             while step >= step_tol:
                 x_after = x - step*gradient
                 # print("x, gradient, x_after", x, gradient, x_after)
                 if cons(x_after) >= -1e-8:
-                    print("violating constraints, halfing step size.")
+                    if printDebug:
+                        print("violating constraints, halfing step size.")
                     # print('cons(x_after):', cons(x_after))
                     step /= 2.0
                     continue
@@ -108,80 +111,98 @@ def BarrierGD(x0, constraints):
                 else:
                     step /= 2.0
             if (step < step_tol):
-                print(
-                    'outer iter: {}, innerIter: {}. step < tol, exiting inner loop.'.format(i, j))
+                if printDebug:
+                    print(
+                        'outer iter: {}, innerIter: {}. step < tol, exiting inner loop.'.format(i, j))
                 break
         if (step < step_tol):
-            print(
-                'step < tol, exiting outer loop at iter {}.'.format(i))
+            if printDebug:
+                print(
+                    'step < tol, exiting outer loop at iter {}.'.format(i))
             break
         t = t*mu
         if t >= max_t:
-            print("exit, t = {}".format(t))
+            if printDebug:
+                print("exit, t = {}".format(t))
             break
     x_history = x_history[:, :k]
-    return x_history
+    return x_history, k
 
 
 # x0 = np.array([0.2, 0.4], dtype=np.double)
-# x0 = np.array([-0.1, -0.1], dtype=np.double)
-# x0 = np.array([-0.5, 0.5], dtype=np.double)
-x0 = np.array([0.6, -0.4], dtype=np.double)
-x0 = np.array([-0.5, 1.2], dtype=np.double)  # infeasible intial solution
+# x1 = np.array([-0.1, -0.1], dtype=np.double)
+# x2 = np.array([-0.5, 0.5], dtype=np.double)
+# x3 = np.array([0.6, -0.4], dtype=np.double)
+# x4 = np.array([-0.5, 1.2], dtype=np.double)  # infeasible intial solution
 
+# # closer to solution but not on center path
+# x5 = np.array([-0.6, -0.4], dtype=np.double)
+
+x = np.zeros((2, 6), dtype=np.double)
+x[:, 0] = np.array([0.2, 0.4], dtype=np.double)
+x[:, 1] = np.array([-0.1, -0.1], dtype=np.double)
+x[:, 2] = np.array([-0.5, 0.5], dtype=np.double)
+x[:, 3] = np.array([0.6, -0.4], dtype=np.double)
+x[:, 4] = np.array([-0.5, 1.2], dtype=np.double)  # infeasible intial solution
 # closer to solution but not on center path
-# x0 = np.array([-0.6, -0.4], dtype=np.double)
-x0 = np.reshape(x0, (2, 1))
+x[:, 5] = np.array([-0.6, -0.4], dtype=np.double)
+
 # opt = GD
 opt = BarrierGD
 
 # constraints = circle([])
 constraints = linearCons([])
 print("-------------------Starting Optimization---------------------------")
-x_history = opt(x0, constraints)
-print("Total iterations: ", format(x_history.shape[1]))
-print('Calculated Optimal solution x1 = {}, x2 = {}.'.format(
-    x_history[0, -1], x_history[1, -1]))
-# print(x_history)
-print("optimal cost: ", f1(x_history[0, -1], x_history[1, -1])[0])
-# plt.figure(figsize=(12, 9))
-# plt.figure(figsize=(16, 12))
-plt.figure(figsize=(8, 6))
-plt.plot(x_history[0, :], x_history[1, :], '.:', label='history')
-plt.plot(x_history[0, 0], x_history[1, 0], 's', label='init')
-# for i in range(1, x_history.shape[1]):
-#   dx = x_history[0,i] - x_history[0,i-1]
-#   dy = x_history[1,i] - x_history[1,i-1]
-#   plt.arrow(x_history[0,i-1], x_history[1,i-1], dx, dy, head_width=0.04, head_length=0.1, linewidth=1, color='r', length_includes_head=True)
-plt.plot(x_history[0, -1], x_history[1, -1], 'o', label='solution')
-# plt.plot([-np.sqrt(2)/2], [-np.sqrt(2)/2], 'o', label='solution')
+runAllSolve = True
+if runAllSolve:
+    for i in range(x.shape[1]):
+        x_history, k = opt(np.reshape(x[:, i], (2, 1)), constraints)
+        print("Solve {}, Total iterations: {}.".format(i, k))
+else:
+    x_history, k = opt(np.reshape(x[:, 0], (2, 1)), constraints)
+    print("Solve {}, Total iterations: {}.".format(i, k))
+    print('Calculated Optimal solution x1 = {}, x2 = {}.'.format(
+        x_history[0, -1], x_history[1, -1]))
+    # print(x_history)
+    print("optimal cost: ", f1(x_history[0, -1], x_history[1, -1])[0])
+    # plt.figure(figsize=(12, 9))
+    # plt.figure(figsize=(16, 12))
+    plt.figure(figsize=(8, 6))
+    plt.plot(x_history[0, :], x_history[1, :], '.:', label='history')
+    plt.plot(x_history[0, 0], x_history[1, 0], 's', label='init')
+    # for i in range(1, x_history.shape[1]):
+    #   dx = x_history[0,i] - x_history[0,i-1]
+    #   dy = x_history[1,i] - x_history[1,i-1]
+    #   plt.arrow(x_history[0,i-1], x_history[1,i-1], dx, dy, head_width=0.04, head_length=0.1, linewidth=1, color='r', length_includes_head=True)
+    plt.plot(x_history[0, -1], x_history[1, -1], 'o', label='solution')
+    # plt.plot([-np.sqrt(2)/2], [-np.sqrt(2)/2], 'o', label='solution')
 
-boundaries = constraints.boundary()
-i = 1
-for boundary in boundaries:
-    plt.plot(boundary[0, :], boundary[1, :],
-             '--', label='constraint ' + str(i))
-    i += 1
+    boundaries = constraints.boundary()
+    i = 1
+    for boundary in boundaries:
+        plt.plot(boundary[0, :], boundary[1, :],
+                 '--', label='constraint ' + str(i))
+        i += 1
 
-plt.axis('equal')
-plt.legend()
-plt.title("min(x1 + x2)")
-plt.xlabel("x1")
-plt.ylabel("x2")
-plt.grid()
-plt.show(block=False)
-plt.savefig('2D'+constraints.name+'.png')
+    plt.axis('equal')
+    plt.legend()
+    plt.title("min(x1 + x2)")
+    plt.xlabel("x1")
+    plt.ylabel("x2")
+    plt.grid()
+    plt.show(block=False)
+    plt.savefig('2D'+constraints.name+'.png')
 
-# plt.figure(figsize=(12, 9))
-# plt.figure(figsize=(16, 12))
+    # plt.figure(figsize=(12, 9))
+    # plt.figure(figsize=(16, 12))
 
-plt.figure(figsize=(8, 6))
-plt.subplot(2, 1, 1)
-plt.plot(x_history[0, :], '.-')
-plt.ylabel("x1")
-plt.grid()
-plt.subplot(2, 1, 2)
-plt.plot(x_history[1, :], '.-')
-plt.ylabel("x2")
-plt.grid()
-plt.show()
+    plt.figure(figsize=(8, 6))
+    plt.subplot(2, 1, 1)
+    plt.plot(x_history[0, :], '.-')
+    plt.ylabel("x1")
+    plt.grid()
+    plt.subplot(2, 1, 2)
+    plt.plot(x_history[1, :], '.-')
+    plt.ylabel("x2")
+    plt.grid()
+    plt.show()
