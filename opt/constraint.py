@@ -87,6 +87,13 @@ class linearCons:
             # print("res, f", res, f)
         return res
 
+    def deriv(self, x):
+        res = np.zeros((2, 1), dtype=np.double)
+        for i in range(len(self._kx)):
+            grad = dlinear(x[0], x[1], self._kx[i], self._ky[i])
+            res += grad
+        return res
+
     def derivBarrier(self, x):
         res = np.zeros((2, 1), dtype=np.double)
         for i in range(len(self._kx)):

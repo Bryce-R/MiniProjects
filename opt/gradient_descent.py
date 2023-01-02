@@ -31,7 +31,7 @@ def GD(x0, constraint):
     step = 0.2
     k = 1
 
-    cons, dCons = constraints.cons, constraints.deriv
+    cons = constraints.cons
     for i in range(1, maxIter):
         x -= step*df1(x[0], x[1])
         x_history[:, k] = x
@@ -50,8 +50,8 @@ def BarrierGD(x0, constraints):
     x_history = np.zeros((2, maxIter*maxInnerIter+1), dtype=np.double)
     x_history[:, 0] = x0[:, 0]
 
-    t = 1.0
-    mu = 5.0  # t is scaled by this each outer iteration
+    t = 10.0
+    mu = 10.0  # t is scaled by this each outer iteration
     max_t = 1e7
     step_tol = 1e-8
     # gradient descent on t*f(x) + phi(x)
@@ -59,31 +59,32 @@ def BarrierGD(x0, constraints):
     # g(x)<=0.0
     # d(phi(x))/dx = - (d(gx)/dx) / g(x)
     # constraint function, constraint function derivative, linearAndCircleBarrier
-    cons, dCons, barrierCons = constraints.cons, constraints.derivBarrier, constraints.barrier
+    cons, deriv, barrierCons, barrierDeriv = constraints.cons, constraints.deriv, constraints.barrier, constraints.derivBarrier
     k = 1
     # infeasibility handling
     step = 0.1
-    while cons(x) > 0.0:
+    while cons(x) >= -1e-3:
         # infeasible
-        gradient = dCons(x)
+        gradient = deriv(x)
         before_cost = cons(x)
         while step >= step_tol:
             x_after = x - step*gradient
             after_cost = cons(x_after)
             if after_cost < before_cost:
-                x_history[:, k] = x_after
+                x_history[:, k] = x_after[:, 0]
                 x = x_after
                 k += 1
                 break
             else:
                 step /= 2.0
     print("{} iters of infeasibility steps.".format(k-1))
+    step = 0.1
     for i in range(maxIter):
         # centering step, bring solution x to the central path
         for j in range(maxInnerIter):
             before_cost = t*f1(x[0], x[1]) + barrierCons(x)
-            gradient = t*df1(x[0], x[1]) + dCons(x)
-            # print("x, gradient, dCons(x)", x, gradient, dCons(x))
+            gradient = t*df1(x[0], x[1]) + barrierDeriv(x)
+            # print("x, gradient, barrierDeriv(x)", x, gradient, barrierDeriv(x))
             if np.linalg.norm(gradient) < 1e-5:
                 print(
                     "outer iter: {}, innerIter: {}. gradien norm < 1e-5, exiting inner loop.".format(i, j))
@@ -122,11 +123,11 @@ def BarrierGD(x0, constraints):
     return x_history
 
 
-x0 = np.array([0.2, 0.4], dtype=np.double)
+# x0 = np.array([0.2, 0.4], dtype=np.double)
 # x0 = np.array([-0.1, -0.1], dtype=np.double)
 # x0 = np.array([-0.5, 0.5], dtype=np.double)
-# x0 = np.array([0.6, -0.4], dtype=np.double)
-# x0 = np.array([-0.5, 1.2], dtype=np.double)  # infeasible intial solution
+x0 = np.array([0.6, -0.4], dtype=np.double)
+x0 = np.array([-0.5, 1.2], dtype=np.double)  # infeasible intial solution
 
 # closer to solution but not on center path
 # x0 = np.array([-0.6, -0.4], dtype=np.double)
