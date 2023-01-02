@@ -215,7 +215,6 @@ def BarrierGD(x0, constraints):
                 step /= 2.0
     print("{} iters of infeasibility steps.".format(k-1))
     for i in range(maxIter):
-        step = 0.3
         # centering step
         for j in range(maxInnerIter):
             before_cost = t*f1(x[0], x[1]) + barrierCons(x)
@@ -229,7 +228,7 @@ def BarrierGD(x0, constraints):
                 x_after = x - step*gradient
                 # print("x, gradient, x_after", x, gradient, x_after)
                 if cons(x_after) >= -1e-8:
-                    # print("violating constraints, halfing step size.")
+                    print("violating constraints, halfing step size.")
                     # print('cons(x_after):', cons(x_after))
                     step /= 2.0
                     continue
@@ -247,8 +246,10 @@ def BarrierGD(x0, constraints):
                 print(
                     'outer iter: {}, innerIter: {}. step < tol, exiting inner loop.'.format(i, j))
                 break
-        # print(
-        #     'iter: {}, exiting outer iter {}.'.format(k, i))
+        if (step < step_tol):
+            print(
+                'step < tol, exiting outer loop at iter {}.'.format(i))
+            break
         t = t*mu
         if t >= max_t:
             print("exit, t = {}".format(t))
