@@ -74,9 +74,11 @@ def GD(x0, f, df):
 
 
 x = np.zeros((2, 6), dtype=np.double)
-x[:, 0] = np.array([0.2, 0.4], dtype=np.double)
+# simple case, converging along one axis
+x[:, 0] = np.array([0.0, 0.8], dtype=np.double)
+# swing and overshoot left and right
 x[:, 1] = np.array([0.12, -0.8], dtype=np.double)
-x[:, 2] = np.array([-0.5, 0.5], dtype=np.double)
+x[:, 2] = np.array([-0.01, 0.8], dtype=np.double)
 x[:, 3] = np.array([0.6, -0.4], dtype=np.double)
 x[:, 4] = np.array([-0.5, 1.2], dtype=np.double)  # infeasible intial solution
 # closer to solution but not on center path
@@ -91,7 +93,7 @@ if runAllSolve:
         x_history, k = opt(np.reshape(x[:, i], (2, 1)), f1, df1)
         print("Solve {}, Total iterations: {}.".format(i, k))
 else:
-    i = 1
+    i = 2
     x_history, k = opt(np.reshape(x[:, i], (2, 1)), f1, df1)
     print("Solve {}, Total iterations: {}.".format(i, k))
     print('Calculated Optimal solution x1 = {}, x2 = {}.'.format(
