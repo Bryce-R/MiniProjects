@@ -26,6 +26,7 @@ class circle:
     _k1 = 1.0
     _k2 = 1.0
     _r = 1
+    name = "circleCons"
 
     def __init__(self, params):
         if len(params) != 0:
@@ -91,6 +92,7 @@ class linearCons:
     _kx = [0.0, -1.0]
     _ky = [-1.0, 0.0]
     _c = [-0.5, -0.5]
+    name = "linearCons"
 
     def __init__(self, params):
         if len(params) != 0:
@@ -245,8 +247,8 @@ x0 = np.reshape(x0, (2, 1))
 # opt = GD
 opt = BarrierGD
 
-# constraints = circle([])
-constraints = linearCons([])
+constraints = circle([])
+# constraints = linearCons([])
 print("-------------------Starting Optimization---------------------------")
 x_history = opt(x0, constraints)
 print("Total iterations: ", format(x_history.shape[1]))
@@ -280,6 +282,7 @@ plt.xlabel("x1")
 plt.ylabel("x2")
 plt.grid()
 plt.show(block=False)
+plt.savefig('2D'+constraints.name+'.png')
 
 # plt.figure(figsize=(12, 9))
 # plt.figure(figsize=(16, 12))
