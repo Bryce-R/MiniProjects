@@ -59,7 +59,7 @@ def BarrierGD(x0, constraints):
     # g(x)<=0.0
     # d(phi(x))/dx = - (d(gx)/dx) / g(x)
     # constraint function, constraint function derivative, linearAndCircleBarrier
-    cons, dCons, barrierCons = constraints.cons, constraints.deriv, constraints.barrier
+    cons, dCons, barrierCons = constraints.cons, constraints.derivBarrier, constraints.barrier
     k = 1
     # infeasibility handling
     step = 0.1

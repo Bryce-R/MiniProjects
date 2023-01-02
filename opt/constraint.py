@@ -15,7 +15,7 @@ class circle:
     def cons(self, x):
         return self._k1*x[0]**2 + self._k2*x[1]**2 - self._r
 
-    def deriv(self, x):
+    def derivBarrier(self, x):
         dfdx = -np.array(
             [self._k1*2.0*x[0], self._k2*2.0*x[1]], dtype=np.double)
         return np.reshape(dfdx, (2, 1)) / self.cons(x)
@@ -87,7 +87,7 @@ class linearCons:
             # print("res, f", res, f)
         return res
 
-    def deriv(self, x):
+    def derivBarrier(self, x):
         res = np.zeros((2, 1), dtype=np.double)
         for i in range(len(self._kx)):
             grad = -dlinear(x[0], x[1], self._kx[i], self._ky[i])
