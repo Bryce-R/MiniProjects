@@ -59,6 +59,16 @@ def GD(x0, f, df):
                 print(
                     'Iter: {}: step < tol, exiting.'.format(i))
             break
+        # if (np.abs(before_cost - after_cost) / np.abs(before_cost) < 1e-12):
+        #     if printDebug:
+        #         print(
+        #             'Iter: {}: cost change < tol, exiting.'.format(i))
+        #     break
+        if np.linalg.norm(gradient) < 1e-5:
+            if printDebug:
+                print(
+                    "Iter: {}: gradien norm < 1e-5, exiting .".format(i))
+            break
     x_history = x_history[:, :k]
     return x_history, k
 
@@ -107,7 +117,7 @@ else:
         i += 1
 
     plt.axis('equal')
-    plt.legend()
+    plt.legend(fancybox=True, framealpha=0.5)
     plt.title("min(5*x1^2 + x2^2)")
     plt.xlabel("x1")
     plt.ylabel("x2")
