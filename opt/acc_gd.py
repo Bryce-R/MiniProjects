@@ -85,30 +85,25 @@ def NesterovGD(x0, f, df):
     cost_history = np.zeros((maxIter, 1), dtype=np.double)
     cost_history[0, 0] = f(x0)
     x_history[:, 0] = x0[:, 0]
-    step = 0.2
+    step = 0.1  # should be less than eps where f function is 1/eps smooth
     k = 1
     step_tol = 1e-8
     printDebug = True
     for i in range(1, maxIter):
-        before_cost = f(x)
-        if (k > 2):
-            kk = k-1
-            y_k = x + (kk-1)/(kk+2) * \
-                np.reshape(x_history[:, kk]-x_history[:, kk-1], (2, 1))
-            gradient = df(y_k)
-        else:
-            gradient = df(x)
-        while step >= step_tol:
-            x_after = x - step*gradient
-            after_cost = f(x_after)
-            if after_cost < before_cost:
-                x_history[:, k] = x_after[:, 0]
-                cost_history[k, 0] = after_cost
-                x = x_after
-                k += 1
-                break
-            else:
-                step /= 2.0
+        # before_cost = f(x)
+
+        kk = k-1
+        y_k = x + (kk-1)/(kk+2) * \
+            np.reshape(x_history[:, kk]-x_history[:, max(kk-1, 0)], (2, 1))
+
+        gradient = df(y_k)
+        x_after = x - step*gradient
+        after_cost = f(x_after)
+        x_history[:, k] = x_after[:, 0]
+        cost_history[k, 0] = after_cost
+        x = x_after
+        k += 1
+
         if (step < step_tol):
             if printDebug:
                 print(
