@@ -36,6 +36,8 @@ def GD(x0, f, df):
     x = x0
     maxIter = 200
     x_history = np.zeros((2, maxIter), dtype=np.double)
+    cost_history = np.zeros((maxIter, 1), dtype=np.double)
+    cost_history[0, 0] = f(x0)
     x_history[:, 0] = x0[:, 0]
     step = 0.2
     k = 1
@@ -49,6 +51,7 @@ def GD(x0, f, df):
             after_cost = f(x_after)
             if after_cost < before_cost:
                 x_history[:, k] = x_after[:, 0]
+                cost_history[k, 0] = after_cost
                 x = x_after
                 k += 1
                 break
@@ -70,7 +73,60 @@ def GD(x0, f, df):
                     "Iter: {}: gradien norm < 1e-5, exiting .".format(i))
             break
     x_history = x_history[:, :k]
-    return x_history, k
+    cost_history = cost_history[:k, :]
+    return x_history, cost_history, k
+
+
+def NesterovGD(x0, f, df):
+    # http://awibisono.github.io/2016/06/20/accelerated-gradient-descent.html
+    x = x0
+    maxIter = 200
+    x_history = np.zeros((2, maxIter), dtype=np.double)
+    cost_history = np.zeros((maxIter, 1), dtype=np.double)
+    cost_history[0, 0] = f(x0)
+    x_history[:, 0] = x0[:, 0]
+    step = 0.2
+    k = 1
+    step_tol = 1e-8
+    printDebug = True
+    for i in range(1, maxIter):
+        before_cost = f(x)
+        if (k > 2):
+            kk = k-1
+            y_k = x + (kk-1)/(kk+2) * \
+                np.reshape(x_history[:, kk]-x_history[:, kk-1], (2, 1))
+            gradient = df(y_k)
+        else:
+            gradient = df(x)
+        while step >= step_tol:
+            x_after = x - step*gradient
+            after_cost = f(x_after)
+            if after_cost < before_cost:
+                x_history[:, k] = x_after[:, 0]
+                cost_history[k, 0] = after_cost
+                x = x_after
+                k += 1
+                break
+            else:
+                step /= 2.0
+        if (step < step_tol):
+            if printDebug:
+                print(
+                    'Iter: {}: step < tol, exiting.'.format(i))
+            break
+        # if (np.abs(before_cost - after_cost) / np.abs(before_cost) < 1e-12):
+        #     if printDebug:
+        #         print(
+        #             'Iter: {}: cost change < tol, exiting.'.format(i))
+        #     break
+        if np.linalg.norm(gradient) < 1e-5:
+            if printDebug:
+                print(
+                    "Iter: {}: gradien norm < 1e-5, exiting .".format(i))
+            break
+    x_history = x_history[:, :k]
+    cost_history = cost_history[:k, :]
+    return x_history, cost_history, k
 
 
 x = np.zeros((2, 6), dtype=np.double)
@@ -84,17 +140,19 @@ x[:, 4] = np.array([-0.5, 1.2], dtype=np.double)  # infeasible intial solution
 # closer to solution but not on center path
 x[:, 5] = np.array([-0.6, -0.4], dtype=np.double)
 
-opt = GD
+# opt, name = GD, "vanillaGD"
+opt, name = NesterovGD, "NesterovGD"
+
 
 print("-------------------Starting Optimization---------------------------")
 runAllSolve = False
 if runAllSolve:
     for i in range(x.shape[1]):
-        x_history, k = opt(np.reshape(x[:, i], (2, 1)), f1, df1)
+        x_history, cost_history, k = opt(np.reshape(x[:, i], (2, 1)), f1, df1)
         print("Solve {}, Total iterations: {}.".format(i, k))
 else:
-    i = 2
-    x_history, k = opt(np.reshape(x[:, i], (2, 1)), f1, df1)
+    i = 1
+    x_history, cost_history, k = opt(np.reshape(x[:, i], (2, 1)), f1, df1)
     print("Solve {}, Total iterations: {}.".format(i, k))
     print('Calculated Optimal solution x1 = {}, x2 = {}.'.format(
         x_history[0, -1], x_history[1, -1]))
@@ -126,18 +184,27 @@ else:
     # plt.grid()
     plt.grid(color='lightgray', linestyle='--')
     plt.show(block=False)
-    plt.savefig('2D_acc_gd.png')
+    plt.savefig('acc_'+name+'_2d.png')
 
     # plt.figure(figsize=(12, 9))
     # plt.figure(figsize=(16, 12))
 
     plt.figure(figsize=(8, 6))
-    plt.subplot(2, 1, 1)
+    plt.suptitle(name)
+    plt.subplot(3, 1, 1)
     plt.plot(x_history[0, :], '.-')
     plt.ylabel("x1")
     plt.grid()
-    plt.subplot(2, 1, 2)
+    plt.subplot(3, 1, 2)
     plt.plot(x_history[1, :], '.-')
     plt.ylabel("x2")
     plt.grid()
+    plt.subplot(3, 1, 3)
+    plt.plot(cost_history[:, 0], '.-')
+    plt.yscale('log')
+    # plt.autoscale(enable=True, axis='x', tight=True)
+    plt.ylabel("cost")
+    plt.grid()
+    plt.savefig('acc_'+name+'_x.png')
+
     plt.show()
