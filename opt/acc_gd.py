@@ -85,12 +85,12 @@ def NesterovGD(x0, f, df):
     cost_history = np.zeros((maxIter, 1), dtype=np.double)
     cost_history[0, 0] = f(x0)
     x_history[:, 0] = x0[:, 0]
-    step = 0.1  # should be less than eps where f function is 1/eps smooth
+    step = 0.05  # should be less than eps where f function is 1/eps smooth
     k = 1
     step_tol = 1e-8
     printDebug = True
     for i in range(1, maxIter):
-        # before_cost = f(x)
+        before_cost = f(x)
 
         kk = k-1
         y_k = x + (kk-1)/(kk+2) * \
@@ -109,7 +109,7 @@ def NesterovGD(x0, f, df):
                 print(
                     'Iter: {}: step < tol, exiting.'.format(i))
             break
-        # if (np.abs(before_cost - after_cost) / np.abs(before_cost) < 1e-12):
+        # if (np.abs(before_cost - after_cost) / np.abs(before_cost) < 1e-5):
         #     if printDebug:
         #         print(
         #             'Iter: {}: cost change < tol, exiting.'.format(i))
@@ -117,7 +117,7 @@ def NesterovGD(x0, f, df):
         if np.linalg.norm(gradient) < 1e-5:
             if printDebug:
                 print(
-                    "Iter: {}: gradien norm < 1e-5, exiting .".format(i))
+                    "Iter: {}: gradient norm < 1e-5, exiting .".format(i))
             break
     x_history = x_history[:, :k]
     cost_history = cost_history[:k, :]
@@ -140,13 +140,13 @@ opt, name = NesterovGD, "NesterovGD"
 
 
 print("-------------------Starting Optimization---------------------------")
-runAllSolve = False
+runAllSolve = True
 if runAllSolve:
     for i in range(x.shape[1]):
         x_history, cost_history, k = opt(np.reshape(x[:, i], (2, 1)), f1, df1)
         print("Solve {}, Total iterations: {}.".format(i, k))
 else:
-    i = 1
+    i = 4
     x_history, cost_history, k = opt(np.reshape(x[:, i], (2, 1)), f1, df1)
     print("Solve {}, Total iterations: {}.".format(i, k))
     print('Calculated Optimal solution x1 = {}, x2 = {}.'.format(
