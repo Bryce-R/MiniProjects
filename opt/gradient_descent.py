@@ -126,6 +126,65 @@ def BarrierGD(x0, constraints):
     return x_history, k
 
 
+def ProximalGD(x0, constraints, f, df):
+    maxIter = 8
+
+    printDebug = False
+    x = x0
+    x_history = np.zeros((2, maxIter+1), dtype=np.double)
+    x_history[:, 0] = x0[:, 0]
+
+    cons, deriv = constraints.cons, constraints.deriv
+
+    step = 0.1
+    for i in range(maxIter):
+        # centering step, bring solution x to the central path
+        for j in range(maxInnerIter):
+            before_cost = t*f1(x[0], x[1]) + barrierCons(x)
+            gradient = t*df1(x[0], x[1]) + barrierDeriv(x)
+            # print("x, gradient, barrierDeriv(x)", x, gradient, barrierDeriv(x))
+            if np.linalg.norm(gradient) < 1e-5:
+                if printDebug:
+                    print(
+                        "outer iter: {}, innerIter: {}. gradien norm < 1e-5, exiting inner loop.".format(i, j))
+                break
+            while step >= step_tol:
+                x_after = x - step*gradient
+                # print("x, gradient, x_after", x, gradient, x_after)
+                if cons(x_after) >= -1e-8:
+                    if printDebug:
+                        print("violating constraints, halfing step size.")
+                    # print('cons(x_after):', cons(x_after))
+                    step /= 2.0
+                    continue
+                after_cost = t*f1(x_after[0], x_after[1]
+                                  ) + barrierCons(x_after)
+                if after_cost < before_cost:
+                    x_history[:, k] = x_after[:, 0]
+                    x = x_after
+                    k += 1
+                    # print("step, gradient, x: ",step, gradient, x)
+                    break
+                else:
+                    step /= 2.0
+            if (step < step_tol):
+                if printDebug:
+                    print(
+                        'outer iter: {}, innerIter: {}. step < tol, exiting inner loop.'.format(i, j))
+                break
+        if (step < step_tol):
+            if printDebug:
+                print(
+                    'step < tol, exiting outer loop at iter {}.'.format(i))
+            break
+        t = t*mu
+        if t >= max_t:
+            if printDebug:
+                print("exit, t = {}".format(t))
+            break
+    x_history = x_history[:, :k]
+    return x_history, k
+
 
 x = np.zeros((2, 6), dtype=np.double)
 x[:, 0] = np.array([0.2, 0.4], dtype=np.double)

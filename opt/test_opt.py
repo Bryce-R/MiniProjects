@@ -17,7 +17,7 @@ x[:, 5] = np.array([-0.6, -0.4], dtype=np.double)
 opt = BarrierGD
 
 constraints = circle([])
-constraints = linearCons([])
+# constraints = linearCons([])
 print("-------------------Starting Optimization---------------------------")
 runAllSolve = False
 if runAllSolve:
