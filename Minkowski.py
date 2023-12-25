@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import copy
 
 # https://cp-algorithms.com/geometry/minkowski.html
+# https://cse442-17f.github.io/Gilbert-Johnson-Keerthi-Distance-Algorithm/ 
 
 
 def reorder_polygon(polygon):
