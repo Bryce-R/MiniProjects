@@ -1,9 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
+from PointLineSegmentDistance import point
 
 # https://cp-algorithms.com/geometry/minkowski.html
-# https://cse442-17f.github.io/Gilbert-Johnson-Keerthi-Distance-Algorithm/ 
+# https://cse442-17f.github.io/Gilbert-Johnson-Keerthi-Distance-Algorithm/
 
 
 def reorder_polygon(polygon):

@@ -5,6 +5,7 @@ import copy
 
 
 # algorithm: https://paulbourke.net/geometry/pointlineplane/
+# stackoverflow discussion: https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
 
 
 class point:
@@ -38,6 +39,9 @@ class point:
         result.x = self.x * other
         result.y = self.y * other
         return result
+
+    def np_array(self):
+        result = np.array([self.x, self.y])
 
 
 def point_distance_to_line_segment(point, linePoint1, linePoint2):
