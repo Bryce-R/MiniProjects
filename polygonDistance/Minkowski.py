@@ -91,7 +91,7 @@ def plot_polygon(polygon, color, legend):
 
 
 # Example usage
-example = 3
+example = 5
 if example == 1:
     # two triangles
     # dis = -2
@@ -108,6 +108,18 @@ elif example == 3:
 elif example == 4:
     # CCW
     polygon1 = np.array([[-3, 1], [-2, 2], [-4, 2]])
+    polygon2 = np.array([[2, 1], [4, 1], [4, 3], [2, 3]])
+elif example == 5:
+    # CCW
+    theta = np.pi / 2.0 + 0.1
+    radius = 2
+    polygon1 = np.array(
+        [
+            [0.0, 0.0],
+            [2 * np.cos(theta + np.pi / 3), 2 * np.sin(theta + np.pi / 3)],
+            [2 * np.cos(theta + np.pi * 0.667), 2 * np.sin(theta + np.pi * 0.667)],
+        ]
+    )
     polygon2 = np.array([[2, 1], [4, 1], [4, 3], [2, 3]])
 
 # sumPoly = minkowski(polygon1, polygon2)
